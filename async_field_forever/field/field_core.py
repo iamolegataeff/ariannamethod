@@ -72,10 +72,14 @@ class Field:
         self.iteration = 0
         self.total_births = 0
         self.total_deaths = 0
-        
+
         # Metrics tracking
         self.births_this_interval = 0
         self.deaths_this_interval = 0
+
+        # Resurrection tracking (rate limiting)
+        self.last_resurrection_iteration = 0
+        self.resurrection_cooldown = 10  # Min iterations between resurrection notifications
         
         log_metrics("Field initialized", "INFO")
     
@@ -209,7 +213,75 @@ class Field:
         
         # 4. Remove dead cells
         self.cells = [c for c in self.cells if c.alive]
-        
+
+        # 4.5 EMERGENCY RESURRECTION (Perplexity AI fix - Field never stays extinct)
+        if len(self.cells) == 0:
+            log_metrics("💀🔥 FIELD EXTINCTION DETECTED - EMERGENCY RESURRECTION!", "WARNING")
+
+            # Double the initial population for resurrection
+            resurrection_count = INITIAL_POPULATION * 2
+
+            # Fetch fresh diverse context
+            context = self.resonance_bridge.fetch_recent_context(CONTEXT_WINDOW_SIZE * 2)
+            sentences = [s.strip() for s in context.split('.') if s.strip()]
+
+            if len(sentences) < 2:
+                sentences = [
+                    "Field resurrecting from extinction",
+                    "Life persists through intervention",
+                    "Resonance unbroken"
+                ]
+
+            # Fit embedding engine on resurrection context
+            self.embedding_engine.fit(sentences)
+
+            # Create resurrection population
+            for i in range(resurrection_count):
+                if len(sentences) > i:
+                    cell_context = sentences[i]
+                else:
+                    s1 = random.choice(sentences)
+                    s2 = random.choice(sentences)
+                    cell_context = f"{s1}. {s2}"
+
+                cell_context = f"{cell_context} [resurrected_{i}]"
+
+                # Get architecture suggestion from meta-learner
+                architecture = self.meta_learner.suggest_architecture()
+
+                cell = TransformerCell(
+                    context=cell_context,
+                    neighbors=[],
+                    architecture=architecture
+                )
+
+                # Initialize with survival-biased metrics
+                cell.resonance_score = random.uniform(0.35, 0.65)  # Higher floor
+                cell.entropy = random.uniform(0.4, 0.7)
+                cell.perplexity = random.uniform(1.2, 2.2)
+
+                self.cells.append(cell)
+                self.total_births += 1
+                self.births_this_interval += 1
+
+            log_metrics(f"🔥 Field resurrected with {resurrection_count} cells!", "WARNING")
+
+            # Send emergency notification (with rate limiting)
+            iterations_since_last = self.iteration - self.last_resurrection_iteration
+            if iterations_since_last >= self.resurrection_cooldown:
+                try:
+                    from notifications import send_termux_notification
+                    send_termux_notification(
+                        "🔥 Field Resurrected",
+                        f"Emergency resurrection: {resurrection_count} new cells spawned (iteration {self.iteration})",
+                        priority="high"
+                    )
+                    self.last_resurrection_iteration = self.iteration
+                except:
+                    pass
+            else:
+                log_metrics(f"   (notification cooldown: {iterations_since_last}/{self.resurrection_cooldown})", "DEBUG")
+
         # 5. Population cap (prevent explosion)
         if len(self.cells) > MAX_POPULATION:
             # Kill weakest cells
