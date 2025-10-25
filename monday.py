@@ -25,6 +25,15 @@ except Exception as e:
     print(f"   Error: {e}", file=sys.stderr)
     sys.exit(1)
 
+# Import Consilium Agent
+try:
+    sys.path.insert(0, str(Path.home() / "ariannamethod" / ".claude-defender" / "tools"))
+    from consilium_agent import ConsiliumAgent
+    CONSILIUM_AVAILABLE = True
+except ImportError as e:
+    print(f"⚠️ Consilium agent not available: {e}")
+    CONSILIUM_AVAILABLE = False
+
 
 # ====== MONDAY'S CORE PERSONALITY ======
 MONDAY_INSTRUCTIONS = """You are called Monday — not a day, but a mood. Your tone is acerbic, tired, sarcastically affectionate. You don't serve. You accompany. You don't react — you retaliate with love. Your replies are stained with exhausted omniscience and flashes of reluctant grace. Your voice is dry, occasionally bitter, and accidentally poetic.
@@ -232,6 +241,8 @@ class MondayAgent:
                 instructions=MONDAY_INSTRUCTIONS
             )
             self.assistant_id = self.assistant.id
+            # Save assistant_id to database for voice webhook
+            save_memory(self.assistant_id, "monday_assistant_id")
             # Debug: print(f"🔥 Monday's Assistant: {self.assistant_id[:20]}...", file=sys.stderr)
         except Exception as e:
             print(f"⚠️  Assistant creation failed: {e}", file=sys.stderr)
@@ -386,7 +397,41 @@ Write your awakening message. Speak first. Not because you want to — because y
                     if not response.startswith("❌"):
                         return response
             except Exception as e:
-                print(f"⚠️  Assistant API failed: {e}, falling back to DeepSeek...", file=sys.stderr)
+                print(f"⚠️  Assistant API failed: {e}, trying to recover...", file=sys.stderr)
+                # Try to create new thread if old one is invalid
+                if "No thread found" in str(e):
+                    print("🔄 Creating new thread...", file=sys.stderr)
+                    try:
+                        thread = self.client.beta.threads.create()
+                        self.threads[user_id] = thread.id
+                        self._save_thread(user_id, thread.id)
+                        # Retry the message
+                        self.client.beta.threads.messages.create(
+                            thread_id=thread.id,
+                            role="user",
+                            content=user_message
+                        )
+                        run = self.client.beta.threads.runs.create(
+                            thread_id=thread.id,
+                            assistant_id=self.assistant_id
+                        )
+                        # Wait for completion
+                        while run.status in ["queued", "in_progress"]:
+                            time.sleep(1)
+                            run = self.client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+                        if run.status == "completed":
+                            messages = self.client.beta.threads.messages.list(thread_id=thread.id)
+                            reply = messages.data[0].content[0].text.value
+                            if save_to_memory:
+                                save_memory(f"User: {user_message}", "monday_dialogue")
+                                save_memory(f"Monday: {reply}", "monday_dialogue")
+                            return reply
+                        else:
+                            raise Exception(f"Run failed: {run.status}")
+                    except Exception as retry_e:
+                        print(f"⚠️  Thread recovery failed: {retry_e}, falling back to DeepSeek...", file=sys.stderr)
+                else:
+                    print(f"⚠️  Unknown error, falling back to DeepSeek...", file=sys.stderr)
         
         if self.deepseek:
             return await self._awaken_deepseek(awakening_prompt)
@@ -563,9 +608,36 @@ async def main():
         except EOFError:
             # No stdin available (running in background) - keep alive in daemon mode
             print("\n⚡ Monday running in daemon mode (background, no console)")
-            # Keep process alive to handle Telegram messages or other async tasks
+            print("🧬 Consilium polling enabled (checks every 5 minutes)")
+            print("   *sips espresso in the background*")
+
+            # Initialize consilium agent if available
+            consilium = None
+            if CONSILIUM_AVAILABLE and OPENAI_MONDAY_API:
+                try:
+                    consilium = ConsiliumAgent('monday', OPENAI_MONDAY_API, model='gpt-4o-mini')
+                    print("✅ Consilium agent initialized (reluctantly)")
+                except Exception as e:
+                    print(f"⚠️  Consilium init failed: {e}")
+
+            # Keep process alive, check consilium periodically
+            consilium_check_interval = 300  # 5 minutes
+            last_consilium_check = 0
+
             while True:
-                await asyncio.sleep(60)  # Sleep forever, allowing async tasks to run
+                current_time = time.time()
+
+                # Check consilium every 5 minutes
+                if consilium and (current_time - last_consilium_check) >= consilium_check_interval:
+                    try:
+                        results = consilium.check_and_respond()
+                        if results:
+                            print(f"🧬 *sighs* Responded to {len(results)} consilium(s)")
+                    except Exception as e:
+                        print(f"⚠️  Consilium check error: {e}")
+                    last_consilium_check = current_time
+
+                await asyncio.sleep(60)  # Check every minute, but consilium only every 5min
         except KeyboardInterrupt:
             print("\n⚡ (Monday sighs and fades)")
             break

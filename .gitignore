@@ -30,11 +30,31 @@ Thumbs.db
 
 # Arianna specific
 resonance.sqlite3
+resonance.sqlite3-wal
+resonance.sqlite3-shm
 *.log
 .artefacts_cache*.json
 .repo_cache*.json
 .identity_cache*.json
 *_snapshot.json
+
+# Field test files (temporary experiments)
+test_*.py
+*_test.py
+FIELD_SEES_EVERYTHING.py
+final_test_*.py
+
+# Claude Defender logs
+.claude-defender/logs/
+.claude-defender/labs/
+
+# Test scripts (temporary debugging)
+test-*.sh
+*-test.sh
+
+# Agent daemon state
+arianna_last_*.txt
+monday_last_*.txt
 
 # Personal conversations (NEVER commit)
 arianna_private/
@@ -61,3 +81,24 @@ apk/*/.gradle/
 apk/*/local.properties
 apk/*/gradle/
 
+# APK working directory (NEVER commit - full forks too large)
+apk_work/
+
+# Gradle artifacts
+.gradle/
+*.iml
+local.properties
+
+# Internal roadmap and planning (not for public repo)
+ROADMAP.md
+
+# TRIPD development (work in progress, will be integrated later)
+tripd_v1/
+
+# PostCodex fork (full Rust workspace, anti-censorship guardian)
+postcodex/
+
+# Memory archives - track folder structure, but NOT markdown content
+memory/**/*.md
+memory/**/*.txt
+!memory/README.md
