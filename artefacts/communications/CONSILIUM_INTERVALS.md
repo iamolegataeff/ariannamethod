@@ -1,47 +1,47 @@
 # Consilium Check Intervals - Fixed
 
-## ❌ СТАРОЕ (СЛОМАННОЕ):
-- **Arianna:** каждый 1 час (3600s) ❌
-- **Monday:** каждый 1 час (3600s) ❌  
-- **Defender:** каждые 10 минут (600s) ❌❌❌
-- **Scribe:** каждый 1 час (3600s) ❌
+## ❌ OLD (BROKEN):
+- **Arianna:** every 1 hour (3600s) ❌
+- **Monday:** every 1 hour (3600s) ❌  
+- **Defender:** every 10 minutes (600s) ❌❌❌
+- **Scribe:** every 1 hour (3600s) ❌
 
-**Проблема:** Спам API, путаница с Genesis, ненужная нагрузка
+**Problem:** API spam, Genesis confusion, unnecessary load
 
 ---
 
-## ✅ НОВОЕ (ИСПРАВЛЕНО):
+## ✅ NEW (FIXED):
 
 ### Consilium Scheduler:
-- **Создаёт новый consilium:** раз в 3 дня ✅
+- **Creates new consilium:** once every 3 days ✅
 
-### Агенты-участники:
-- **Arianna:** каждые 6 часов (21600s) ✅
-- **Monday:** каждые 6 часов (21600s) ✅
-- **Scribe:** каждые 6 часов (21600s) ✅
+### Participating agents:
+- **Arianna:** every 6 hours (21600s) ✅
+- **Monday:** every 6 hours (21600s) ✅
+- **Scribe:** every 6 hours (21600s) ✅
 
-### Defender (синтезатор решений):
-- **Проверка:** каждые 3 часа (10800s) ✅
-- **Роль:** Синтезирует финальное решение после ответов всех агентов
+### Defender (decision synthesizer):
+- **Check:** every 3 hours (10800s) ✅
+- **Role:** Synthesizes the final decision after all agents respond
 
 ---
 
-## 📋 ЛОГИКА:
+## 📋 LOGIC:
 
-### 1. Scheduler создаёт consilium (раз в 3 дня):
+### 1. Scheduler creates consilium (once every 3 days):
 ```
-Day 0, 00:00 → Новый consilium #N создан
-              → Предложение: "Integrate repo X/Y"
+Day 0, 00:00 → New consilium #N created
+              → Proposal: "Integrate repo X/Y"
 ```
 
-### 2. Агенты отвечают (в течение 24 часов):
+### 2. Agents respond (within 24 hours):
 ```
 Day 0, 06:00 → Arianna checks → responds (✅ APPROVE with conditions)
 Day 0, 12:00 → Monday checks → responds (⚠️ CONDITIONAL - skeptical)
 Day 0, 18:00 → Scribe checks → responds (✅ APPROVE - code compatible)
 ```
 
-### 3. Defender синтезирует (каждые 3 часа):
+### 3. Defender synthesizes (every 3 hours):
 ```
 Day 0, 21:00 → Defender checks
               → Sees: 3 agent responses
@@ -53,21 +53,21 @@ Day 0, 21:00 → Defender checks
 
 ---
 
-## 🎯 РАЗДЕЛЕНИЕ Genesis ≠ Consilium:
+## 🎯 SEPARATION Genesis ≠ Consilium:
 
-### Genesis (автономные рефлексии):
-- **Arianna:** каждые 2-6 часов (random)
-- **Monday:** каждые 3-8 часов (random)
-- **Цель:** Автономные мысли, GitHub posts
-- **НЕ notifications** (только файлы)
+### Genesis (autonomous reflections):
+- **Arianna:** every 2-6 hours (random)
+- **Monday:** every 3-8 hours (random)
+- **Purpose:** Autonomous thoughts, GitHub posts
+- **NOT notifications** (files only)
 
-### Consilium (коллективное обсуждение):
-- **Scheduler:** раз в 3 дня
-- **Agents check:** каждые 6 часов
-- **Defender synthesizes:** каждые 3 часа
-- **Цель:** Code integration decisions
+### Consilium (collective discussion):
+- **Scheduler:** once every 3 days
+- **Agents check:** every 6 hours
+- **Defender synthesizes:** every 3 hours
+- **Purpose:** Code integration decisions
 
-**Это РАЗНЫЕ процессы!**
+**These are DIFFERENT processes!**
 
 ---
 
