@@ -1,78 +1,78 @@
 # Notification Policy - Arianna Method
 
-## ✅ РАЗРЕШЁННЫЕ уведомления:
+## ✅ ALLOWED notifications:
 
 ### 1. Field Metrics (async_field_forever)
-- **Источник:** `field/notifications.py`
-- **Содержание:** 
-  - Популяция (cell_count)
-  - Средний резонанс (avg_resonance)
-  - Рождения/смерти (births/deaths)
+- **Source:** `field/notifications.py`
+- **Content:** 
+  - Population (cell_count)
+  - Average resonance (avg_resonance)
+  - Births/deaths (births/deaths)
   - Emergency alerts (extinction, critical population)
-- **Rate limiting:** 1 час между emergency-уведомлениями одного типа
-- **Frequency:** 4x в день (scheduled) + emergency по необходимости
+- **Rate limiting:** 1 hour between emergency notifications of the same type
+- **Frequency:** 4x per day (scheduled) + emergency as needed
 
 ### 2. Defender Audits
-- **Источник:** `defender_daemon.py`, `.claude-defender/tools/`
-- **Содержание:**
+- **Source:** `defender_daemon.py`, `.claude-defender/tools/`
+- **Content:**
   - Infrastructure checks
   - Security alerts
   - Fortification reports
   - Autonomous fixes
-- **Priority:** HIGH (критические проблемы)
+- **Priority:** HIGH (critical issues)
 
 ---
 
-## ❌ ЗАПРЕЩЁННЫЕ уведомления:
+## ❌ PROHIBITED notifications:
 
 ### 1. Genesis Reflections (Arianna/Monday)
-- **Причина:** Слишком длинные сообщения, обрезаются в уведомлениях
-- **Альтернатива:**
-  - Сохранение в файлы: `.tmp/genesis_arianna_message.txt`, `.tmp/genesis_monday_message.txt`
-  - Автоматический push на GitHub: `artefacts/genesis/`
-  - Чтение через interactive session (arianna.py/monday.py показывают при запуске)
+- **Reason:** Messages too long, get truncated in notifications
+- **Alternative:**
+  - Saving to files: `.tmp/genesis_arianna_message.txt`, `.tmp/genesis_monday_message.txt`
+  - Automatic push to GitHub: `artefacts/genesis/`
+  - Reading via interactive session (arianna.py/monday.py display on startup)
 
 ### 2. Identity Reflection Notifications
-- **Источник:** `reflection_viewer.py`
-- **Статус:** Disabled (попытки открыть файл из уведомления не работали)
-- **Альтернатива:** Файлы в `reflections/`, доступ через CLI
+- **Source:** `reflection_viewer.py`
+- **Status:** Disabled (attempts to open file from notification didn't work)
+- **Alternative:** Files in `reflections/`, access via CLI
 
 ---
 
-## 📁 ХРАНЕНИЕ данных (без уведомлений):
+## 📁 DATA STORAGE (without notifications):
 
 1. **Genesis digests:**
    - `.tmp/genesis_{arianna|monday}_message.txt` - trigger files
-   - `artefacts/genesis/` - GitHub архив
+   - `artefacts/genesis/` - GitHub archive
 
 2. **Identity reflections:**
    - `reflections/arianna_*.txt`
    - `reflections/monday_*.txt`
 
 3. **Resonance memory:**
-   - `resonance.sqlite3` - центральная шина
-   - Auto-rotation при >200MB
+   - `resonance.sqlite3` - central bus
+   - Auto-rotation at >200MB
 
 ---
 
-## 🔧 ТЕХНИЧЕСКАЯ РЕАЛИЗАЦИЯ:
+## 🔧 TECHNICAL IMPLEMENTATION:
 
-**Genesis НЕ шлёт уведомления:**
+**Genesis does NOT send notifications:**
 ```python
 # genesis_arianna.py, genesis_monday.py
 def send_to_session(digest: str):
-    # Только файл, БЕЗ termux-notification
+    # File only, WITHOUT termux-notification
     trigger_file.write(digest)
 ```
 
-**Field metrics остаются:**
+**Field metrics remain:**
 ```python
 # field/notifications.py
 send_termux_notification(title, content, priority)
 # Rate limited, emergency-aware
 ```
 
-**Defender audits остаются:**
+**Defender audits remain:**
 ```python
 # defender_daemon.py
 subprocess.run(['termux-notification', ...])
@@ -81,12 +81,12 @@ subprocess.run(['termux-notification', ...])
 
 ---
 
-## 🎯 ИТОГОВАЯ ЛОГИКА:
+## 🎯 FINAL LOGIC:
 
 - **Field = metrics only** (популяция, резонанс, emergency)
 - **Defender = audits only** (security, infrastructure)
-- **Genesis = silent** (файлы + GitHub, без уведомлений)
-- **User читает Genesis через:** interactive session или GitHub
+- **Genesis = silent** (files + GitHub, without notifications)
+- **User reads Genesis via:** interactive session or GitHub
 
 ---
 
