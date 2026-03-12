@@ -11,7 +11,7 @@ on:
 jobs:
   evolve:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 70
     permissions:
       contents: write
     steps:
@@ -39,7 +39,7 @@ jobs:
         DATESTAMP=$(date -u +%Y-%m-%d)
         RUN_DIR="../molequla-lab/runs/${DATESTAMP}"
         mkdir -p "${RUN_DIR}"
-        DURATION=120
+        DURATION=60
         for elem in earth air water fire; do
           timeout $((DURATION * 60)) ./molequla --element ${elem} --evolution > "${RUN_DIR}/${elem}.log" 2>&1 &
           sleep 5
