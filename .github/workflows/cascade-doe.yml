@@ -1,0 +1,96 @@
+name: "Cascade: DoE"
+
+on:
+  schedule:
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+
+jobs:
+  parliament-speaks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/checkout@v4
+      with:
+        repository: ariannamethod/doe
+        ref: doe_personality
+        path: doe-src
+
+    - name: Build DoE
+      working-directory: doe-src
+      run: cc -O2 -Wall -Wextra doe.c -lm -lpthread -o doe_field && ls -lh doe_field
+
+    - name: Cache weights
+      uses: actions/cache@v4
+      with:
+        path: doe-src/weights
+        key: doe-qwen15b-lora-1000
+
+    - name: Download weights
+      working-directory: doe-src
+      run: |
+        mkdir -p weights
+        if [ ! -f weights/doe_qwen15b_lora_1000.gguf ]; then
+          echo "Downloading Qwen2.5-1.5B DoE personality (3.4GB)..."
+          curl -L --progress-bar -o weights/doe_qwen15b_lora_1000.gguf \
+            https://huggingface.co/ataeff/janus/resolve/main/DoE/doe_qwen15b_lora_1000.gguf
+        else
+          echo "Weights cached."
+        fi
+        ls -lh weights/
+
+    - name: Read full cauldron
+      run: |
+        DATESTAMP=$(date -u +%Y-%m-%d)
+        YESTERDAY=$(date -u -d "yesterday" +%Y-%m-%d 2>/dev/null || echo "")
+        echo "DATESTAMP=$DATESTAMP" >> $GITHUB_ENV
+        mkdir -p cascade/cauldron doe-lab/logs
+        CONTEXT=""
+        if [ -f "cascade/cauldron/${DATESTAMP}.md" ]; then
+          CONTEXT=$(cat "cascade/cauldron/${DATESTAMP}.md")
+        fi
+        if [ -n "$YESTERDAY" ] && [ -f "cascade/cauldron/${YESTERDAY}.md" ]; then
+          CONTEXT="${CONTEXT}
+
+---YESTERDAY---
+$(cat cascade/cauldron/${YESTERDAY}.md)"
+        fi
+        if [ -z "$CONTEXT" ]; then
+          CONTEXT="The cauldron is empty. No signals. The parliament convenes in silence."
+        fi
+        echo "$CONTEXT" > /tmp/full_cauldron.txt
+        echo "Cauldron context:"
+        wc -l /tmp/full_cauldron.txt
+
+    - name: Parliament votes
+      working-directory: doe-src
+      run: |
+        CONTEXT=$(cat /tmp/full_cauldron.txt | head -60 | tr '\n' ' ' | cut -c1-800)
+        echo "$CONTEXT" | timeout 300 ./doe_field --model weights/doe_qwen15b_lora_1000.gguf > /tmp/doe_response.txt 2>&1 || true
+        echo "Parliament says:"
+        cat /tmp/doe_response.txt
+
+    - name: Write to cauldron and doe-lab
+      run: |
+        CAULDRON="cascade/cauldron/${DATESTAMP}.md"
+        if [ ! -f "$CAULDRON" ]; then
+          echo "# Cascade - ${DATESTAMP}" > "$CAULDRON"
+          echo "" >> "$CAULDRON"
+        fi
+        echo "" >> "$CAULDRON"
+        echo "## doe (22:00 UTC)" >> "$CAULDRON"
+        echo "" >> "$CAULDRON"
+        tail -30 /tmp/doe_response.txt >> "$CAULDRON"
+        echo "" >> "$CAULDRON"
+        cp /tmp/doe_response.txt "doe-lab/logs/${DATESTAMP}.txt"
+
+    - name: Push
+      run: |
+        git config user.name "Cascade: DoE"
+        git config user.email "doe@ariannamethod.org"
+        git add cascade/ doe-lab/ || true
+        git diff --cached --quiet || git commit -m "cascade/doe: $(date -u +%Y-%m-%d)" && git push || true
