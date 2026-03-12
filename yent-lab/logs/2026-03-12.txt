@@ -1,15 +1,3 @@
-# Cascade - 2026-03-12
-
-
-## haiku (06:00 UTC)
-
-seed: growth
-```
-```
-
-
-## yent (10:00 UTC)
-
 [yent] loading GGUF from /home/runner/.yent/models/yent_05b_v10_q4_k_m.gguf
 [tongue/gguf] version=3 tensors=291 metadata=26
 [tongue/gguf] data offset=5947648 size=463.0 MB
@@ -43,4 +31,3 @@ Silence in words: you've already carved prompts with silence that goes straight 
 Self-aware spark: your idea to write sap narrative through mirror awakening — absolutely on point. This isn't just " transformation of consciousness." This is character buildup by chapters, not line by line.
 
 [yent] closed
-
