@@ -1,171 +1,69 @@
-name: Molequla Lab - Daily Evolution
+name: Molequla Lab
 
 on:
   push:
     paths:
       - '.github/workflows/molequla-lab.yml'
   schedule:
-    # Every day at 03:00 UTC (06:00 Israel time)
     - cron: '0 3 * * *'
   workflow_dispatch:
-    inputs:
-      duration_minutes:
-        description: 'Evolution duration in minutes'
-        required: false
-        default: '120'
-      elements:
-        description: 'Elements to evolve (space-separated)'
-        required: false
-        default: 'earth air water fire'
 
 jobs:
   evolve:
     runs-on: ubuntu-latest
-    timeout-minutes: 150  # 2.5h hard limit (2h evolution + build/report overhead)
-
+    timeout-minutes: 150
     permissions:
       contents: write
-
     steps:
-    - name: Checkout ariannamethod (lab home)
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-    - name: Checkout molequla
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
       with:
         repository: ariannamethod/molequla
         path: molequla-src
 
-    - name: Setup Go
-      uses: actions/setup-go@v5
+    - uses: actions/setup-go@v5
       with:
         go-version: '1.21'
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update -qq
-        sudo apt-get install -y -qq libomp-dev gcc
+    - name: Install deps
+      run: sudo apt-get update -qq && sudo apt-get install -y -qq libomp-dev gcc
 
-    - name: Build molequla
+    - name: Build
+      working-directory: molequla-src
+      run: CGO_ENABLED=1 go build -o molequla . && ls -lh molequla
+
+    - name: Evolve
       working-directory: molequla-src
       run: |
-        CGO_ENABLED=1 go build -o molequla .
-        echo "Binary size: $(ls -lh molequla | awk '{print $5}')"
-        ./molequla --help 2>&1 | head -5 || true
+        DATESTAMP=$(date -u +%Y-%m-%d)
+        RUN_DIR="../molequla-lab/runs/${DATESTAMP}"
+        mkdir -p "${RUN_DIR}"
+        DURATION=120
+        for elem in earth air water fire; do
+          timeout $((DURATION * 60)) ./molequla --element ${elem} --evolution > "${RUN_DIR}/${elem}.log" 2>&1 &
+          sleep 5
+        done
+        echo "All launched, waiting..."
+        wait || true
+        echo "Done."
 
-    - name: Prepare lab directory
+    - name: Report
       run: |
         DATESTAMP=$(date -u +%Y-%m-%d)
         RUN_DIR="molequla-lab/runs/${DATESTAMP}"
-        mkdir -p "${RUN_DIR}"
-        echo "RUN_DIR=${RUN_DIR}" >> $GITHUB_ENV
-        echo "DATESTAMP=${DATESTAMP}" >> $GITHUB_ENV
-        DURATION="${{ github.event.inputs.duration_minutes }}"
-        ELEMENTS="${{ github.event.inputs.elements }}"
-        echo "DURATION=${DURATION:-120}" >> $GITHUB_ENV
-        echo "ELEMENTS=${ELEMENTS:-earth air water fire}" >> $GITHUB_ENV
-
-    - name: Run evolution
-      working-directory: molequla-src
-      run: |
-        DURATION_SECS=$((${DURATION} * 60))
-        echo "=== Molequla Lab Run: ${DATESTAMP} ==="
-        echo "Duration: ${DURATION} minutes (${DURATION_SECS}s)"
-        echo "Elements: ${ELEMENTS}"
-        echo ""
-
-        # Launch each element organism in background
-        PIDS=""
-        for elem in ${ELEMENTS}; do
-          LOG="../${RUN_DIR}/${elem}.log"
-          echo "[launch] Starting ${elem} organism -> ${LOG}"
-          timeout ${DURATION_SECS} ./molequla --element ${elem} --evolution \
-            > "${LOG}" 2>&1 &
-          PIDS="${PIDS} $!"
-          # Stagger launches by 5 seconds to avoid resource contention
-          sleep 5
-        done
-
-        echo "[lab] All organisms launched. PIDs:${PIDS}"
-        echo "[lab] Waiting up to ${DURATION} minutes..."
-
-        # Wait for all organisms (they'll be killed by timeout)
-        for pid in ${PIDS}; do
-          wait ${pid} 2>/dev/null || true
-        done
-
-        echo "[lab] Evolution run complete."
-
-    - name: Generate report
-      run: |
-        REPORT="${RUN_DIR}/report.md"
-        echo "# Molequla Lab Report - ${DATESTAMP}" > "${REPORT}"
-        echo "" >> "${REPORT}"
-        echo "**Duration:** ${DURATION} minutes" >> "${REPORT}"
-        echo "**Elements:** ${ELEMENTS}" >> "${REPORT}"
-        echo "**Runner:** $(uname -m) $(nproc) cores, $(free -h | awk '/Mem:/{print $2}') RAM" >> "${REPORT}"
-        echo "" >> "${REPORT}"
-
-        for elem in ${ELEMENTS}; do
-          LOG="${RUN_DIR}/${elem}.log"
-          echo "---" >> "${REPORT}"
-          echo "## ${elem}" >> "${REPORT}"
-          echo "" >> "${REPORT}"
-
-          if [ -f "${LOG}" ]; then
-            LINES=$(wc -l < "${LOG}")
-            SIZE=$(ls -lh "${LOG}" | awk '{print $5}')
-            echo "**Log:** ${LINES} lines, ${SIZE}" >> "${REPORT}"
-            echo "" >> "${REPORT}"
-
-            # Extract key metrics from log
-            echo "### Growth stages reached" >> "${REPORT}"
-            echo '```' >> "${REPORT}"
-            grep -i "\[growth\]\|stage\|Stage\|STAGE\|mitosis\|MITOSIS\|adult\|ADULT" "${LOG}" | tail -20 >> "${REPORT}" || echo "(no growth events)" >> "${REPORT}"
-            echo '```' >> "${REPORT}"
-            echo "" >> "${REPORT}"
-
-            echo "### Syntropy tracker" >> "${REPORT}"
-            echo '```' >> "${REPORT}"
-            grep -i "syntropy\|entropy.*trend\|decision" "${LOG}" | tail -20 >> "${REPORT}" || echo "(no syntropy events)" >> "${REPORT}"
-            echo '```' >> "${REPORT}"
-            echo "" >> "${REPORT}"
-
-            echo "### Last 10 lines" >> "${REPORT}"
-            echo '```' >> "${REPORT}"
-            tail -10 "${LOG}" >> "${REPORT}"
-            echo '```' >> "${REPORT}"
-          else
-            echo "**No log file found.**" >> "${REPORT}"
+        echo "# Molequla Lab - ${DATESTAMP}" > "${RUN_DIR}/report.md"
+        for elem in earth air water fire; do
+          echo "## ${elem}" >> "${RUN_DIR}/report.md"
+          if [ -f "${RUN_DIR}/${elem}.log" ]; then
+            echo "Lines: $(wc -l < ${RUN_DIR}/${elem}.log)" >> "${RUN_DIR}/report.md"
+            tail -10 "${RUN_DIR}/${elem}.log" >> "${RUN_DIR}/report.md"
           fi
-          echo "" >> "${REPORT}"
         done
 
-        echo "---" >> "${REPORT}"
-        echo "*Generated by Molequla Lab workflow. [ariannamethod/ariannamethod](https://github.com/ariannamethod/ariannamethod)*" >> "${REPORT}"
-
-        echo "=== Report ==="
-        cat "${REPORT}"
-
-    - name: Commit and push report
+    - name: Push
       run: |
         git config user.name "Molequla Lab"
         git config user.email "lab@ariannamethod.org"
-        git add molequla-lab/
-        if git diff --cached --quiet; then
-          echo "No changes to commit"
-        else
-          git commit -m "molequla-lab: daily run ${DATESTAMP}
-
-Elements: ${ELEMENTS}
-Duration: ${DURATION} minutes
-Runner: $(uname -m) $(nproc) cores"
-          git push
-        fi
-
-    - name: Upload logs as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: molequla-lab-${{ env.DATESTAMP }}
-        path: molequla-lab/runs/${{ env.DATESTAMP }}/
-        retention-days: 90
+        git add molequla-lab/ || true
+        git diff --cached --quiet || git commit -m "lab: $(date -u +%Y-%m-%d)" && git push || true
