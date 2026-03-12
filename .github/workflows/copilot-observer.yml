@@ -1,0 +1,78 @@
+name: Copilot Observer
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+jobs:
+  daily-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Daily health check issue
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        DATESTAMP=$(date -u +%Y-%m-%d)
+        gh issue create \
+          --title "Health check ${DATESTAMP}" \
+          --assignee "copilot" \
+          --body "## Daily Health Check - ${DATESTAMP}
+
+Check the following and report in a comment:
+
+1. Look at \`molequla-lab/runs/\` — did yesterday's Molequla Lab run complete? Are there logs for all 4 elements (earth, air, water, fire)?
+2. Look at \`haiku-lab/exchanges/\` — did yesterday's Haiku Pollination run produce an exchange file?
+3. Check if any workflow run failed in the last 24 hours.
+4. If everything is healthy, close this issue with a comment: 'All systems nominal.'
+5. If something is broken, leave the issue open and describe what failed.
+
+Keep it short. No fluff."
+
+  biweekly-report:
+    runs-on: ubuntu-latest
+    if: contains('1,3,5', github.event.schedule && '0' || format('{0}', github.run_number))
+    permissions:
+      contents: read
+      issues: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check if report day
+      id: check
+      run: |
+        DOW=$(date -u +%u)
+        if [ "$DOW" = "1" ] || [ "$DOW" = "4" ]; then
+          echo "run=true" >> $GITHUB_OUTPUT
+        else
+          echo "run=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Evaluation report issue
+      if: steps.check.outputs.run == 'true'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        DATESTAMP=$(date -u +%Y-%m-%d)
+        gh issue create \
+          --title "Evaluation report ${DATESTAMP}" \
+          --assignee "copilot" \
+          --body "## Bi-weekly Evaluation Report - ${DATESTAMP}
+
+Write an evaluation report covering the last 2 days. Save it as \`molequla-lab/reports/${DATESTAMP}-eval.md\` and open a PR.
+
+Include:
+
+1. **Molequla Lab**: How many runs completed? Any failures? Growth trends from the logs (look at line counts, stage transitions, any patterns).
+2. **Haiku Pollination**: Did exchanges happen? What seeds were used? Any interesting haiku generated?
+3. **Overall health**: Are both workflows running reliably?
+4. **Observations**: Anything unusual, interesting, or noteworthy.
+
+Read the actual log files in \`molequla-lab/runs/\` and \`haiku-lab/exchanges/\`. Base your report on data, not assumptions.
+
+Format: clean markdown, concise, no filler."
