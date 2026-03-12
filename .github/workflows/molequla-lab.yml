@@ -57,8 +57,10 @@ jobs:
         mkdir -p "${RUN_DIR}"
         echo "RUN_DIR=${RUN_DIR}" >> $GITHUB_ENV
         echo "DATESTAMP=${DATESTAMP}" >> $GITHUB_ENV
-        echo "DURATION=${{ github.event.inputs.duration_minutes || '120' }}" >> $GITHUB_ENV
-        echo "ELEMENTS=${{ github.event.inputs.elements || 'earth air water fire' }}" >> $GITHUB_ENV
+        DURATION="${{ github.event.inputs.duration_minutes }}"
+        ELEMENTS="${{ github.event.inputs.elements }}"
+        echo "DURATION=${DURATION:-120}" >> $GITHUB_ENV
+        echo "ELEMENTS=${ELEMENTS:-earth air water fire}" >> $GITHUB_ENV
 
     - name: Run evolution
       working-directory: molequla-src
