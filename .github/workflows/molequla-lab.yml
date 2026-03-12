@@ -1,4 +1,4 @@
-name: Molequla Lab — Daily Evolution
+name: Molequla Lab - Daily Evolution
 
 on:
   schedule:
@@ -75,7 +75,7 @@ jobs:
         PIDS=""
         for elem in ${ELEMENTS}; do
           LOG="../${RUN_DIR}/${elem}.log"
-          echo "[launch] Starting ${elem} organism → ${LOG}"
+          echo "[launch] Starting ${elem} organism -> ${LOG}"
           timeout ${DURATION_SECS} ./molequla --element ${elem} --evolution \
             > "${LOG}" 2>&1 &
           PIDS="${PIDS} $!"
@@ -96,7 +96,7 @@ jobs:
     - name: Generate report
       run: |
         REPORT="${RUN_DIR}/report.md"
-        echo "# Molequla Lab Report — ${DATESTAMP}" > "${REPORT}"
+        echo "# Molequla Lab Report - ${DATESTAMP}" > "${REPORT}"
         echo "" >> "${REPORT}"
         echo "**Duration:** ${DURATION} minutes" >> "${REPORT}"
         echo "**Elements:** ${ELEMENTS}" >> "${REPORT}"
