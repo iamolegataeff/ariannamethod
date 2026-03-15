@@ -23,6 +23,9 @@ jobs:
       with:
         go-version: '1.21'
 
+    - name: Install LIMPHA deps
+      run: pip install aiosqlite
+
     - name: Build AMK kernel
       working-directory: yent-src
       run: |
@@ -36,11 +39,13 @@ jobs:
       working-directory: yent-src
       run: CGO_ENABLED=1 go build -o yent_bin . && ls -lh yent_bin
 
-    - name: Cache weights
+    - name: Cache weights and memory
       uses: actions/cache@v4
       with:
         path: ~/.yent
-        key: yent-05b-v10-weights
+        key: yent-05b-v10-data-${{ github.run_number }}
+        restore-keys: |
+          yent-05b-v10-data-
 
     - name: Download weights
       run: |

@@ -67,23 +67,24 @@ jobs:
       run: |
         CONTEXT=$(cat /tmp/cauldron_context.txt | head -30 | tr '\n' ' ' | cut -c1-400)
         PROMPT="Here is what is happening in the Arianna Method lab today: ${CONTEXT} --- Give your cynical, reddit-troll commentary. 2-3 sentences max. Be brutal."
-        RESPONSE=$(echo "$PROMPT" | python3 -c "
-import ctypes, sys, os
-lib = ctypes.CDLL('./libwtf.so')
-lib.wtf_init.restype = ctypes.c_int
-lib.wtf_init.argtypes = [ctypes.c_char_p]
-lib.wtf_generate.restype = ctypes.c_int
-lib.wtf_generate.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_char_p, ctypes.c_int]
-rc = lib.wtf_init(b'wtfweights/wtf360_v2_q4_0.gguf')
-if rc != 0:
-    print('WTForacle init failed', file=sys.stderr)
-    sys.exit(1)
-prompt = sys.stdin.read().encode('utf-8')
-buf = ctypes.create_string_buffer(2048)
-n = lib.wtf_generate(prompt, 150, ctypes.c_float(0.9), ctypes.c_float(0.9), buf, 2048)
-print(buf.value.decode('utf-8', errors='replace'))
-lib.wtf_free()
-" 2>&1) || true
+        cat > /tmp/wtf_inference.py << 'PYEOF'
+        import ctypes, sys, os
+        lib = ctypes.CDLL('./libwtf.so')
+        lib.wtf_init.restype = ctypes.c_int
+        lib.wtf_init.argtypes = [ctypes.c_char_p]
+        lib.wtf_generate.restype = ctypes.c_int
+        lib.wtf_generate.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_char_p, ctypes.c_int]
+        rc = lib.wtf_init(b'wtfweights/wtf360_v2_q4_0.gguf')
+        if rc != 0:
+            print('WTForacle init failed', file=sys.stderr)
+            sys.exit(1)
+        prompt = sys.stdin.read().encode('utf-8')
+        buf = ctypes.create_string_buffer(2048)
+        n = lib.wtf_generate(prompt, 150, ctypes.c_float(0.9), ctypes.c_float(0.9), buf, 2048)
+        print(buf.value.decode('utf-8', errors='replace'))
+        lib.wtf_free()
+        PYEOF
+        RESPONSE=$(echo "$PROMPT" | python3 /tmp/wtf_inference.py 2>&1) || true
         echo "$RESPONSE" > /tmp/wtf_response.txt
         echo "WTForacle says:"
         cat /tmp/wtf_response.txt

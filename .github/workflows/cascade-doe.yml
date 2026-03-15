@@ -55,9 +55,8 @@ jobs:
         fi
         if [ -n "$YESTERDAY" ] && [ -f "cascade/cauldron/${YESTERDAY}.md" ]; then
           CONTEXT="${CONTEXT}
-
----YESTERDAY---
-$(cat cascade/cauldron/${YESTERDAY}.md)"
+        ---YESTERDAY---
+        $(cat cascade/cauldron/${YESTERDAY}.md)"
         fi
         if [ -z "$CONTEXT" ]; then
           CONTEXT="The cauldron is empty. No signals. The parliament convenes in silence."

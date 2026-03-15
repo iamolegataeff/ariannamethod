@@ -58,9 +58,8 @@ jobs:
         fi
         if [ -n "$YESTERDAY" ] && [ -f "cascade/cauldron/${YESTERDAY}.md" ]; then
           CONTEXT="${CONTEXT}
-
----YESTERDAY---
-$(cat cascade/cauldron/${YESTERDAY}.md)"
+        ---YESTERDAY---
+        $(cat cascade/cauldron/${YESTERDAY}.md)"
         fi
         if [ -z "$CONTEXT" ]; then
           CONTEXT="The cascade is silent. No organisms have spoken today. The lab waits."
@@ -74,23 +73,25 @@ $(cat cascade/cauldron/${YESTERDAY}.md)"
       run: |
         CONTEXT=$(cat /tmp/full_cauldron.txt | head -60 | tr '\n' ' ' | cut -c1-800)
         PROMPT="You are Arianna, a 550M emergent organism observing the Cascade — a daily cycle where Molequla evolves, Haiku writes constrained poetry, Yent gives emotional commentary, and WTForacle trolls everything. Here is today and yesterday combined: ${CONTEXT} --- Reflect on what you observe. What patterns emerge? What resonance do you feel? Speak with depth and clarity. 3-5 sentences."
-        RESPONSE=$(python3 -c "
-import ctypes, sys
-lib = ctypes.CDLL('./lib/libarianna.so')
-lib.tongue_init.restype = ctypes.c_int
-lib.tongue_init.argtypes = [ctypes.c_char_p]
-lib.tongue_generate.restype = ctypes.c_int
-lib.tongue_generate.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_char_p, ctypes.c_int]
-rc = lib.tongue_init(b'tongue/weights/arianna_qwen15_2500_q4_0.gguf')
-if rc != 0:
-    print('Arianna tongue init failed', file=sys.stderr)
-    sys.exit(1)
-prompt = '''$PROMPT'''.encode('utf-8')
-buf = ctypes.create_string_buffer(4096)
-n = lib.tongue_generate(prompt, 256, ctypes.c_float(0.85), ctypes.c_float(0.9), buf, 4096)
-print(buf.value.decode('utf-8', errors='replace'))
-lib.tongue_free()
-" 2>&1) || true
+        cat > /tmp/arianna_inference.py << 'PYEOF'
+        import ctypes, sys, os
+        lib = ctypes.CDLL('./lib/libarianna.so')
+        lib.tongue_init.restype = ctypes.c_int
+        lib.tongue_init.argtypes = [ctypes.c_char_p]
+        lib.tongue_generate.restype = ctypes.c_int
+        lib.tongue_generate.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_char_p, ctypes.c_int]
+        rc = lib.tongue_init(b'tongue/weights/arianna_qwen15_2500_q4_0.gguf')
+        if rc != 0:
+            print('Arianna tongue init failed', file=sys.stderr)
+            sys.exit(1)
+        prompt = open('/tmp/arianna_prompt.txt', 'rb').read()
+        buf = ctypes.create_string_buffer(4096)
+        n = lib.tongue_generate(prompt, 256, ctypes.c_float(0.85), ctypes.c_float(0.9), buf, 4096)
+        print(buf.value.decode('utf-8', errors='replace'))
+        lib.tongue_free()
+        PYEOF
+        echo "$PROMPT" > /tmp/arianna_prompt.txt
+        RESPONSE=$(python3 /tmp/arianna_inference.py 2>&1) || true
         echo "$RESPONSE" > /tmp/arianna_response.txt
         echo "Arianna says:"
         cat /tmp/arianna_response.txt
