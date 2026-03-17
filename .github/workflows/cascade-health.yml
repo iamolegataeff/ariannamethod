@@ -1,0 +1,66 @@
+name: "Cascade: Health Check"
+
+on:
+  schedule:
+    - cron: '0 20 * * *'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check today's cascade
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        DATESTAMP=$(date -u +%Y-%m-%d)
+        FAILURES=""
+
+        # Check Molequla
+        if [ ! -d "molequla-lab/runs/${DATESTAMP}" ]; then
+          FAILURES="${FAILURES}\n- Molequla: no run directory for today"
+        else
+          for elem in earth air water fire; do
+            LOG="molequla-lab/runs/${DATESTAMP}/${elem}.log"
+            if [ ! -f "$LOG" ]; then
+              FAILURES="${FAILURES}\n- Molequla ${elem}: no log file"
+            else
+              LINES=$(wc -l < "$LOG")
+              if [ "$LINES" -lt 10 ]; then
+                FAILURES="${FAILURES}\n- Molequla ${elem}: only ${LINES} lines (likely crashed)"
+              fi
+            fi
+          done
+        fi
+
+        # Check Haiku
+        if [ ! -f "haiku-lab/exchanges/${DATESTAMP}.md" ]; then
+          FAILURES="${FAILURES}\n- Haiku: no exchange for today"
+        fi
+
+        # Check Conversation
+        if [ ! -f "cascade/conversations/${DATESTAMP}.md" ]; then
+          FAILURES="${FAILURES}\n- Conversation: no conversation for today"
+        fi
+
+        # Check Cauldron
+        if [ ! -f "cascade/cauldron/${DATESTAMP}.md" ]; then
+          FAILURES="${FAILURES}\n- Cauldron: empty for today"
+        fi
+
+        if [ -n "$FAILURES" ]; then
+          printf "Cascade health check FAILED:\n${FAILURES}" > /tmp/health_body.txt
+          gh issue create \
+            --title "Cascade health: failures on ${DATESTAMP}" \
+            --body "$(cat /tmp/health_body.txt)"
+          echo "FAILURES DETECTED:"
+          cat /tmp/health_body.txt
+        else
+          echo "All systems nominal for ${DATESTAMP}."
+        fi

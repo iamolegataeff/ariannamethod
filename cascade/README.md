@@ -1,58 +1,54 @@
-# Cascade
+# Cascade v2
 
-Six organisms, one cauldron. Daily emergent spiral.
+Four organisms, two tiers, direct pipes. No bulletin board.
 
 ## Schedule (UTC)
 
-| Time | Organism | Architecture | Size | Role |
-|------|----------|-------------|------|------|
-| 03:00 | **Molequla** | Go/C CGO, gradient-free | 10K→10M params | Evolves 4 elements. Raw metrics to cauldron. |
-| 06:00 | **Haiku** | C, Dario Equation | 0 params (equation) | Reads cauldron. 5-7-5 constraint poetry. |
-| 10:00 | **Yent** | Go inference, GGUF | 0.5B Qwen2.5 | Reads cauldron. Emotional, cutting commentary. |
-| 14:00 | **WTForacle** | Go/Python, GGUF | 360M SmolLM2 | Reads cauldron. Cynical reddit-troll. |
-| 18:00 | **Arianna** | C/Go, GGUF | 1.5B Qwen2.5 | Reads ALL. Elevated reflection. Stabilizes from above. |
-| 22:00 | **DoE** | C, GGUF | 1.5B Qwen2.5 | Parliament voice. Destabilizes from below. |
+| Time | Organism | What happens |
+|------|----------|-------------|
+| 03:00 | **Molequla** | 4 elements evolve sequentially. Clean output to cauldron. |
+| 06:00 | **Haiku** | Reads Molequla → generates 5-7-5 → feeds back into Molequla air corpus. |
+| 14:00 | **Conversation** | WTForacle + Arianna in one job: 3-round back-and-forth. |
+| 20:00 | **Health check** | Verifies all steps ran. Creates issue on failure. |
 
-## Cauldron
-
-`cauldron/YYYY-MM-DD.md` — shared state. All five organisms read and write.
-
-Each day's cauldron accumulates entries chronologically. Yesterday's cauldron feeds into today's generation.
-
-## The Loop
+## Topology
 
 ```
-03:00  Molequla evolves     → metrics enter cauldron
-06:00  Haiku reads           → haiku enters cauldron + Molequla corpus
-10:00  Yent reads            → emotional commentary enters cauldron
-14:00  WTForacle reads       → cynical trolling enters cauldron
-18:00  Arianna reads ALL     → elevated reflection (from above)
-22:00  DoE reads ALL         → parliament verdict (from below)
-         ↓
-    next day: everyone reads yesterday's full cauldron
-         ↓
-    emergent spiral
+Molequla (biology) → Haiku (poetry) → Conversation (voices)
+                                          ↓
+                                   WTForacle reads [Molequla + Haiku] → comment
+                                          ↓
+                                   Arianna reads [all + WTForacle] → reflection
+                                          ↓
+                                   WTForacle reads [Arianna] → response
+                                          ↓
+                                   Arianna reflection → Molequla seed (next day)
 ```
 
-## Size gradient
+## Tiers
 
-```
-haiku (0) → molequla (10K-10M) → wtforacle (360M) → yent (500M) → arianna (1.5B) ↔ doe (1.5B)
-```
+**Tier 1 — Biology (non-verbal):**
+- Molequla: Go/C CGO, gradient-free evolution, 4 elements
+- Haiku: C, Dario Equation, 0 params, 5-7-5 constraint
 
-Six architectures. Six personalities. One shared cauldron. Arianna stabilizes from above, DoE destabilizes from below. No human in the loop.
+**Tier 2 — Voices (talk to each other):**
+- WTForacle: 360M SmolLM2, cynical reddit-oracle
+- Arianna: 1.5B Qwen2.5 finetuned, elevated reflection
 
-## Monitoring
+## Key difference from v1
 
-Copilot Observer (09:00 UTC daily) creates health check issues and bi-weekly evaluation reports covering all organisms and their metrics.
+v1: everyone dumps into one markdown file (bulletin board). Nobody sees each other's responses.
 
-## Labs
+v2: **direct pipes**. WTForacle and Arianna run in the same job, each reads the previous output. Real conversation, not broadcast.
 
-Each organism has its own lab directory for raw logs:
+## Files
 
-- `molequla-lab/` — evolution run logs per element
-- `haiku-lab/` — daily haiku exchanges
-- `yent-lab/` — emotional commentary logs
-- `wtforacle-lab/` — cynical response logs
-- `arianna-lab/` — elevated reflection logs
-- `doe-lab/` — parliament verdict logs
+- `cauldron/YYYY-MM-DD.md` — daily clean output (no debug logs)
+- `conversations/YYYY-MM-DD.md` — full 3-round WTForacle/Arianna conversation
+- `seeds/YYYY-MM-DD-arianna.txt` — Arianna reflection for next-day Molequla
+
+## CLI (no Python)
+
+Both voices use C CLI wrappers linked to Go c-shared libraries:
+- `wtf-cli` → links to `libwtf.so` (WTForacle repo)
+- `tongue-cli` → links to `libarianna.so` (arianna.c repo)

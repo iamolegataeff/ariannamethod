@@ -33,37 +33,22 @@ jobs:
       working-directory: molequla-src
       run: CGO_ENABLED=1 go build -o molequla . && ls -lh molequla
 
-    - name: Evolve
+    - name: Evolve (all sequential — no SQLITE_BUSY)
       working-directory: molequla-src
       run: |
         DATESTAMP=$(date -u +%Y-%m-%d)
         RUN_DIR="../molequla-lab/runs/${DATESTAMP}"
         mkdir -p "${RUN_DIR}"
         DURATION=15
-        echo "Phase 1: earth (solo — SQLite lock)"
-        timeout $((DURATION * 60)) ./molequla --element earth --evolution > "${RUN_DIR}/earth.log" 2>&1 || true
-        echo "Phase 2: air (solo — SQLite lock)"
-        timeout $((DURATION * 60)) ./molequla --element air --evolution > "${RUN_DIR}/air.log" 2>&1 || true
-        echo "Phase 3: water + fire (parallel)"
-        timeout $((DURATION * 60)) ./molequla --element water --evolution > "${RUN_DIR}/water.log" 2>&1 &
-        timeout $((DURATION * 60)) ./molequla --element fire --evolution > "${RUN_DIR}/fire.log" 2>&1 &
-        wait || true
-        echo "Done. All 4 elements evolved."
-
-    - name: Report
-      run: |
-        DATESTAMP=$(date -u +%Y-%m-%d)
-        RUN_DIR="molequla-lab/runs/${DATESTAMP}"
-        echo "# Molequla Lab - ${DATESTAMP}" > "${RUN_DIR}/report.md"
         for elem in earth air water fire; do
-          echo "## ${elem}" >> "${RUN_DIR}/report.md"
-          if [ -f "${RUN_DIR}/${elem}.log" ]; then
-            echo "Lines: $(wc -l < ${RUN_DIR}/${elem}.log)" >> "${RUN_DIR}/report.md"
-            tail -10 "${RUN_DIR}/${elem}.log" >> "${RUN_DIR}/report.md"
-          fi
+          echo "=== ${elem} ==="
+          timeout $((DURATION * 60)) ./molequla --element $elem --evolution > "${RUN_DIR}/${elem}.log" 2>&1 || true
+          sync
+          echo "${elem} done: $(wc -l < ${RUN_DIR}/${elem}.log) lines"
         done
+        echo "All 4 elements evolved."
 
-    - name: Write to cauldron
+    - name: Write to cauldron (clean output only)
       run: |
         DATESTAMP=$(date -u +%Y-%m-%d)
         mkdir -p cascade/cauldron
@@ -76,8 +61,9 @@ jobs:
         for elem in earth air water fire; do
           if [ -f "${RUN_DIR}/${elem}.log" ]; then
             LINES=$(wc -l < "${RUN_DIR}/${elem}.log")
-            echo "**${elem}**: ${LINES} lines" >> "$CAULDRON"
-            tail -3 "${RUN_DIR}/${elem}.log" >> "$CAULDRON"
+            echo "**${elem}** (${LINES} lines):" >> "$CAULDRON"
+            # Clean output: skip log markers, keep generated text
+            grep -v '^\[' "${RUN_DIR}/${elem}.log" | grep -v '^fatal:' | grep -v '^$' | tail -5 >> "$CAULDRON"
             echo "" >> "$CAULDRON"
           fi
         done

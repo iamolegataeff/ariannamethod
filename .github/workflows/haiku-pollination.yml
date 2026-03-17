@@ -42,31 +42,49 @@ jobs:
       working-directory: molequla-src
       run: CGO_ENABLED=1 go build -o molequla . && ls -lh molequla
 
-    - name: Prepare seed from yesterday
+    - name: Prepare seed from today's Molequla
       run: |
         DATESTAMP=$(date -u +%Y-%m-%d)
         YESTERDAY=$(date -u -d "yesterday" +%Y-%m-%d 2>/dev/null || date -u -v-1d +%Y-%m-%d 2>/dev/null || echo "")
         echo "DATESTAMP=$DATESTAMP" >> $GITHUB_ENV
         mkdir -p haiku-lab/exchanges
+
+        # Try to get seed from today's Molequla cauldron (clean text, not log lines)
         SEED=""
-        if [ -n "$YESTERDAY" ] && [ -f "haiku-lab/exchanges/${YESTERDAY}.md" ]; then
-          SEED=$(grep -A5 "## molequla" "haiku-lab/exchanges/${YESTERDAY}.md" | grep -v "^#" | grep -v '```' | grep -v "^$" | head -3 | tr '\n' ' ')
-          echo "Seed from yesterday molequla: $SEED"
+        if [ -f "cascade/cauldron/${DATESTAMP}.md" ]; then
+          # Extract generated text from Molequla section — skip markdown headers and empty lines
+          SEED=$(sed -n '/## molequla/,/## /p' "cascade/cauldron/${DATESTAMP}.md" | grep -v '^#' | grep -v '^\*\*' | grep -v '^$' | head -3 | tr '\n' ' ')
         fi
+
+        # Fallback: yesterday's haiku exchange
+        if [ -z "$SEED" ] && [ -n "$YESTERDAY" ] && [ -f "haiku-lab/exchanges/${YESTERDAY}.md" ]; then
+          SEED=$(sed -n '/## molequla/,/## /p' "haiku-lab/exchanges/${YESTERDAY}.md" | grep -v '^#' | grep -v '^$' | head -3 | tr '\n' ' ')
+        fi
+
+        # Last fallback: day-of-week word
         if [ -z "$SEED" ]; then
           DOW=$(date -u +%u)
           WORDS="resonance emergence silence growth fire water light shadow"
           SEED=$(echo $WORDS | tr ' ' '\n' | sed -n "${DOW}p")
-          echo "Fallback seed: $SEED"
         fi
+
+        echo "Seed: $SEED"
         echo "SEED=$SEED" >> $GITHUB_ENV
 
-    - name: Haiku reads molequla and responds
+    - name: Haiku generates from seed
       run: |
         echo "Seed: $SEED"
         RAW=$(echo "$SEED" | ./haiku-src/haiku 2>&1)
         echo "$RAW" > haiku-lab/exchanges/haiku_raw.txt
-        HAIKU=$(echo "$RAW" | grep -v "^$" | grep -v "you>" | grep -v "debt=" | grep -v "HAiKU" | grep -v "speaks" | grep -v "there is" | grep -v "bootstrapped" | grep -v "constraint" | grep -v "p(x|" | grep -v "1000 words" | grep -v "\[haiku\]" | grep -v "A:" | head -3)
+
+        # Parse haiku: 3 lines between status (d=...T=) and metrics (debt=)
+        HAIKU=$(echo "$RAW" | sed -n '/d=.*T=/,/debt=/p' | grep -v 'd=' | grep -v 'debt=' | grep -v '^$' | sed 's/^  //' | head -3)
+
+        if [ -z "$HAIKU" ]; then
+          # Fallback: any 2-space indented lines that aren't status/metrics
+          HAIKU=$(echo "$RAW" | grep '^  [a-z]' | head -3 | sed 's/^  //')
+        fi
+
         echo "$HAIKU" > haiku-lab/exchanges/haiku_today.txt
         echo "Haiku generated:"
         cat haiku-lab/exchanges/haiku_today.txt
@@ -74,10 +92,12 @@ jobs:
     - name: Feed haiku into molequla corpus
       run: |
         HAIKU_TEXT=$(cat haiku-lab/exchanges/haiku_today.txt)
-        echo "" >> molequla-src/nonames_air.txt
-        echo "$HAIKU_TEXT" >> molequla-src/nonames_air.txt
-        echo "Appended haiku to air corpus:"
-        tail -5 molequla-src/nonames_air.txt
+        if [ -n "$HAIKU_TEXT" ]; then
+          echo "" >> molequla-src/nonames_air.txt
+          echo "$HAIKU_TEXT" >> molequla-src/nonames_air.txt
+          echo "Appended haiku to air corpus:"
+          tail -5 molequla-src/nonames_air.txt
+        fi
 
     - name: Molequla evolves with haiku in corpus
       working-directory: molequla-src
@@ -101,7 +121,8 @@ jobs:
         echo "" >> "$OUT"
         echo "## molequla responds (air, 10min evolution with haiku in corpus)" >> "$OUT"
         echo '```' >> "$OUT"
-        tail -30 "$DIR/molequla_raw.txt" >> "$OUT"
+        # Clean output only
+        grep -v '^\[' "$DIR/molequla_raw.txt" | grep -v '^fatal:' | tail -20 >> "$OUT"
         echo '```' >> "$OUT"
         rm -f "$DIR/haiku_raw.txt" "$DIR/haiku_today.txt" "$DIR/molequla_raw.txt"
 
@@ -117,9 +138,11 @@ jobs:
         echo "## haiku (06:00 UTC)" >> "$CAULDRON"
         echo "" >> "$CAULDRON"
         echo "seed: ${SEED}" >> "$CAULDRON"
-        echo '```' >> "$CAULDRON"
-        cat haiku-lab/exchanges/${DATESTAMP}.md 2>/dev/null | grep -A3 "## haiku" | grep -v "^#" || echo "(no haiku today)" >> "$CAULDRON"
-        echo '```' >> "$CAULDRON"
+        echo "" >> "$CAULDRON"
+        # Write the actual haiku, not debug
+        if [ -f "haiku-lab/exchanges/${DATESTAMP}.md" ]; then
+          sed -n '/## haiku says/,/## molequla/p' "haiku-lab/exchanges/${DATESTAMP}.md" | grep -v '^#' | grep -v '^```' | grep -v '^$' >> "$CAULDRON"
+        fi
         echo "" >> "$CAULDRON"
 
     - name: Push
