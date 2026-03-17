@@ -1,37 +1,3 @@
-# Cascade - 2026-03-17
-
-## molequla (03:00 UTC)
-
-**earth**: 372 lines
-[dna] earth wrote 96 bytes to ecology
-
-[evolution] Organism shutting down gracefully.
-
-**air**: 142 lines
-[dna] air wrote 51 bytes to ecology
-
-[evolution] Organism shutting down gracefully.
-
-**water**: 229 lines
-[dna] water consumed 62 bytes from 3 files: [fire/gen_1773725460_208.txt fire/gen_1773725463_209.txt fire/gen_1773725467_210.txt]
-
-[evolution] Organism shutting down gracefully.
-
-**fire**: 237 lines
-[dna] fire wrote 9 bytes to ecology
-
-[evolution] Organism shutting down gracefully.
-
-
-## haiku (06:00 UTC)
-
-seed: [dna] air wrote 56 bytes to ecology [dna] air wrote 79 bytes to ecology [dna] air wrote 68 bytes to ecology 
-```
-```
-
-
-## yent (10:00 UTC)
-
 [yent] loading GGUF from /home/runner/.yent/models/yent_05b_v10_q4_k_m.gguf
 [tongue/gguf] version=3 tensors=291 metadata=26
 [tongue/gguf] data offset=5947648 size=463.0 MB
@@ -63,4 +29,3 @@ You want a cut on Reddit? I'll make the cover for it. Call later — time to go 
 
 [limpha] memory stopped
 [yent] closed
-
