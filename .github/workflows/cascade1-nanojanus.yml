@@ -63,23 +63,23 @@ jobs:
     - name: Update cascade state
       run: |
         C1="cascade/cascade1"
-        cat >> "$C1/cascade.md" <<EOF
-
----
-
-## ${DATESTAMP}
-
-**seed:** $(cat "$C1/seed/${DATESTAMP}.txt" 2>/dev/null | head -1 | cut -c1-200)
-
-**haiku:**
-$(cat "$C1/haiku-lab/${DATESTAMP}.txt" 2>/dev/null)
-
-**penelope:** $(cat "$C1/penelope-lab/${DATESTAMP}.txt" 2>/dev/null)
-
-**molequla:** $(wc -l "$C1/molequla-lab/${DATESTAMP}/"*.log 2>/dev/null | tail -1 || echo "no logs")
-
-**nanojanus:** $(cat "$C1/nanojanus-lab/${DATESTAMP}.txt" 2>/dev/null)
-EOF
+        {
+          echo ""
+          echo "---"
+          echo ""
+          echo "## ${DATESTAMP}"
+          echo ""
+          echo "**seed:** $(cat "$C1/seed/${DATESTAMP}.txt" 2>/dev/null | head -1 | cut -c1-200)"
+          echo ""
+          echo "**haiku:**"
+          cat "$C1/haiku-lab/${DATESTAMP}.txt" 2>/dev/null || true
+          echo ""
+          echo "**penelope:** $(cat "$C1/penelope-lab/${DATESTAMP}.txt" 2>/dev/null)"
+          echo ""
+          echo "**molequla:** $(wc -l "$C1/molequla-lab/${DATESTAMP}/"*.log 2>/dev/null | tail -1 || echo "no logs")"
+          echo ""
+          echo "**nanojanus:** $(cat "$C1/nanojanus-lab/${DATESTAMP}.txt" 2>/dev/null)"
+        } >> "$C1/cascade.md"
 
     - name: Push
       run: |
