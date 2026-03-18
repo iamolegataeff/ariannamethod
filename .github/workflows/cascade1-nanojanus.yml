@@ -2,12 +2,19 @@ name: "Cascade 1: NanoJanus"
 
 on:
   schedule:
-    - cron: '30 6 * * *'
+    - cron: '30 8 * * *'
+  workflow_run:
+    workflows: ["Cascade 1: Molequla"]
+    types: [completed]
   workflow_dispatch:
 
 jobs:
   nanojanus:
     runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     timeout-minutes: 15
     permissions:
       contents: write

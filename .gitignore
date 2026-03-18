@@ -35,6 +35,7 @@ resonance.sqlite3-wal
 resonance.sqlite3-shm
 *.sql
 *.log
+!cascade/cascade1/molequla-lab/**/*.log
 .artefacts_cache*.json
 .repo_cache*.json
 .identity_cache*.json
