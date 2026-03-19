@@ -50,7 +50,8 @@ jobs:
 
         echo "Input: $INPUT"
 
-        RAW=$(python3 janus-src/nanojanus.py --weights janus-src/weights/nanojanus.bin --generate "$INPUT" 2>&1)
+        cc janus-src/nanojanus.c -O2 -lm -o nanojanus
+        RAW=$(./nanojanus --weights janus-src/weights/nanojanus.bin --vocab janus-src/nanojanus.txt --generate "$INPUT" 2>&1)
         echo "$RAW" > "$C1/nanojanus-lab/${DATESTAMP}_raw.txt"
 
         # Extract words from bidirectional chain (lines with ^N or vN prefix)
