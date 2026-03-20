@@ -25,154 +25,105 @@ jobs:
       run: |
         DATESTAMP=$(date -u +%Y-%m-%d)
         C1="cascade/cascade1"
-        DAILY_DIR="$C1/daily"
-        REPORT="$DAILY_DIR/${DATESTAMP}.md"
-        mkdir -p "$DAILY_DIR"
+        mkdir -p "$C1/daily"
+        REPORT="$C1/daily/${DATESTAMP}.md"
 
-        # Skip if report already exists (idempotent)
-        if [ -f "$REPORT" ]; then
-          echo "Report for ${DATESTAMP} already exists, updating..."
-        fi
-
-        # === COLLECT DATA ===
-
+        # Collect data
         SEED=$(cat "$C1/seed/${DATESTAMP}.txt" 2>/dev/null | head -3 || echo "(no seed)")
-
         HAIKU=$(cat "$C1/haiku-lab/${DATESTAMP}.txt" 2>/dev/null || echo "(no haiku)")
-        HAIKU_STATUS="OK"
-        [ -z "$(echo "$HAIKU" | tr -d '[:space:]')" ] && HAIKU_STATUS="EMPTY"
-        [ "$HAIKU" = "(no haiku)" ] && HAIKU_STATUS="MISSING"
-
         PENELOPE=$(cat "$C1/penelope-lab/${DATESTAMP}.txt" 2>/dev/null || echo "(no output)")
         PENELOPE_RAW=$(cat "$C1/penelope-lab/${DATESTAMP}_raw.txt" 2>/dev/null | head -30 || echo "(no raw)")
-        PEN_WORDS=$(echo "$PENELOPE" | wc -w | tr -d ' ')
-        PENELOPE_STATUS="OK (${PEN_WORDS} words)"
-        [ "$PEN_WORDS" -lt 3 ] 2>/dev/null && PENELOPE_STATUS="WEAK (${PEN_WORDS} words)"
-        [ "$PENELOPE" = "(no output)" ] && PENELOPE_STATUS="MISSING"
+        NANOJANUS=$(cat "$C1/nanojanus-lab/${DATESTAMP}.txt" 2>/dev/null || echo "(no output)")
+        NANOJANUS_RAW=$(cat "$C1/nanojanus-lab/${DATESTAMP}_raw.txt" 2>/dev/null | head -40 || echo "(no raw)")
 
-        # Molequla per-element
-        MOL_STATUS="OK"
-        MOL_DETAIL=""
+        PEN_WORDS=$(echo "$PENELOPE" | wc -w | tr -d ' ')
+        NJ_WORDS=$(echo "$NANOJANUS" | wc -w | tr -d ' ')
+
+        # Molequla per-element summary
         MOL_TOTAL=0
+        MOL_LINES=""
         if [ -d "$C1/molequla-lab/${DATESTAMP}" ]; then
           for elem in earth air water fire; do
             LOG="$C1/molequla-lab/${DATESTAMP}/${elem}.log"
             if [ -f "$LOG" ]; then
               LINES=$(wc -l < "$LOG" | tr -d ' ')
               MOL_TOTAL=$((MOL_TOTAL + LINES))
-              # Extract meaningful lines (skip pure status/debug, get evolution content)
-              SNIPPET=$(grep -v '^\[debug\]' "$LOG" | grep -v '^$' | grep -v 'Ctrl+C' | tail -5 | head -5)
-              MOL_DETAIL="${MOL_DETAIL}
-#### ${elem} (${LINES} lines)
-\`\`\`
-${SNIPPET}
-\`\`\`
-"
-            else
-              MOL_DETAIL="${MOL_DETAIL}
-#### ${elem}: NO LOG
-"
-              MOL_STATUS="PARTIAL"
+              SNIPPET=$(grep -v '^\[debug\]' "$LOG" | grep -v '^$' | grep -v 'Ctrl+C' | tail -5)
+              MOL_LINES="${MOL_LINES}${elem} (${LINES} lines): $(echo "$SNIPPET" | head -2 | tr '\n' ' ')
+        "
             fi
           done
-        else
-          MOL_STATUS="MISSING"
-          MOL_DETAIL="No run directory for ${DATESTAMP}"
         fi
 
-        NANOJANUS=$(cat "$C1/nanojanus-lab/${DATESTAMP}.txt" 2>/dev/null || echo "(no output)")
-        NANOJANUS_RAW=$(cat "$C1/nanojanus-lab/${DATESTAMP}_raw.txt" 2>/dev/null | head -40 || echo "(no raw)")
-        NJ_WORDS=$(echo "$NANOJANUS" | wc -w | tr -d ' ')
-        NANOJANUS_STATUS="OK (${NJ_WORDS} words)"
-        [ "$NJ_WORDS" -lt 3 ] 2>/dev/null && NANOJANUS_STATUS="WEAK (${NJ_WORDS} words)"
-        [ "$NANOJANUS" = "(no output)" ] && NANOJANUS_STATUS="MISSING"
-
-        # Workflow run times
-        WF_TIMES=""
+        # Workflow statuses
+        WF_INFO=""
         for WF in cascade1-haiku cascade1-penelope cascade1-molequla cascade1-nanojanus; do
-          INFO=$(gh run list --workflow="${WF}.yml" --limit=1 --json conclusion,createdAt,updatedAt \
-            --jq '.[0] | "\(.conclusion) (\(.createdAt | split("T")[1] | split("Z")[0]))"' 2>/dev/null || echo "unknown")
-          WF_TIMES="${WF_TIMES}| ${WF} | ${INFO} |
-"
+          STATUS=$(gh run list --workflow="${WF}.yml" --limit=1 --json conclusion,createdAt \
+            --jq '.[0] | "\(.conclusion) \(.createdAt)"' 2>/dev/null || echo "unknown")
+          WF_INFO="${WF_INFO}| ${WF} | ${STATUS} |
+        "
         done
 
-        # === WRITE REPORT ===
-        cat > "$REPORT" << REPORTEOF
-# Cascade 1 — Daily Report: ${DATESTAMP}
+        # Write report
+        {
+          echo "# Cascade 1 — Daily Report: ${DATESTAMP}"
+          echo ""
+          echo "## Status"
+          echo ""
+          echo "| Organism | Status |"
+          echo "|----------|--------|"
+          echo "| Haiku | $([ "$HAIKU" = '(no haiku)' ] && echo 'MISSING' || echo 'OK') |"
+          echo "| Penelope | OK (${PEN_WORDS} words) |"
+          echo "| Molequla | ${MOL_TOTAL} lines total |"
+          echo "| NanoJanus | OK (${NJ_WORDS} words) |"
+          echo ""
+          echo "## Workflow Runs"
+          echo ""
+          echo "| Workflow | Result |"
+          echo "|----------|--------|"
+          echo "$WF_INFO"
+          echo ""
+          echo "---"
+          echo ""
+          echo "## Seed"
+          echo ""
+          echo "$SEED"
+          echo ""
+          echo "## 1. Haiku"
+          echo ""
+          echo "$HAIKU"
+          echo ""
+          echo "## 2. Penelope (12 words)"
+          echo ""
+          echo "**Words:** ${PENELOPE}"
+          echo ""
+          echo "Raw chain:"
+          echo ""
+          echo "$PENELOPE_RAW"
+          echo ""
+          echo "## 3. Molequla (4 elements, ${MOL_TOTAL} lines)"
+          echo ""
+          echo "$MOL_LINES"
+          echo ""
+          echo "## 4. NanoJanus (12 words, bidirectional)"
+          echo ""
+          echo "**Words:** ${NANOJANUS}"
+          echo ""
+          echo "Raw bidirectional chain:"
+          echo ""
+          echo "$NANOJANUS_RAW"
+          echo ""
+          echo "---"
+          echo ""
+          echo "## Tomorrow's Seed"
+          echo ""
+          echo "${NANOJANUS}  ${PENELOPE}"
+          echo ""
+          echo "---"
+          echo "*Generated by Cascade 1 Daily Report*"
+        } > "$REPORT"
 
-## Status
-
-| Organism | Status |
-|----------|--------|
-| Haiku | ${HAIKU_STATUS} |
-| Penelope | ${PENELOPE_STATUS} |
-| Molequla | ${MOL_STATUS} (${MOL_TOTAL} lines total) |
-| NanoJanus | ${NANOJANUS_STATUS} |
-
-## Workflow Runs
-
-| Workflow | Result |
-|----------|--------|
-${WF_TIMES}
-
----
-
-## Seed
-
-\`\`\`
-${SEED}
-\`\`\`
-
-## 1. Haiku
-
-\`\`\`
-${HAIKU}
-\`\`\`
-
-## 2. Penelope (12 words)
-
-**Words:** ${PENELOPE}
-
-<details>
-<summary>Raw chain output</summary>
-
-\`\`\`
-${PENELOPE_RAW}
-\`\`\`
-</details>
-
-## 3. Molequla (4 elements)
-
-${MOL_DETAIL}
-
-## 4. NanoJanus (12 words, bidirectional)
-
-**Words:** ${NANOJANUS}
-
-<details>
-<summary>Raw bidirectional chain</summary>
-
-\`\`\`
-${NANOJANUS_RAW}
-\`\`\`
-</details>
-
----
-
-## Tomorrow's Seed
-
-NanoJanus 12 words + today's Penelope 12 words:
-
-\`\`\`
-${NANOJANUS}  ${PENELOPE}
-\`\`\`
-
----
-
-*Generated by Cascade 1 Daily Report workflow*
-REPORTEOF
-
-        echo "=== Report written to ${REPORT} ==="
+        echo "=== Report written ==="
         wc -l "$REPORT"
 
     - name: Push
