@@ -144,7 +144,7 @@ jobs:
           # Assign to Copilot for investigation
           ISSUE_NUM=$(echo "$ISSUE_URL" | grep -oE '[0-9]+$')
           if [ -n "$ISSUE_NUM" ]; then
-            gh issue edit "$ISSUE_NUM" --add-assignee "copilot" 2>/dev/null || true
+            gh api "repos/ariannamethod/ariannamethod/issues/${ISSUE_NUM}/assignees" -X POST --input - <<< '{"assignees":["copilot"]}' > /dev/null 2>&1 || true
             echo "Assigned to Copilot for investigation"
           fi
         else

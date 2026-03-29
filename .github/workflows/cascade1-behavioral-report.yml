@@ -196,7 +196,7 @@ jobs:
         echo "Main issue created: $ISSUE_URL"
         ISSUE_NUM=$(echo "$ISSUE_URL" | grep -oE '[0-9]+$')
         if [ -n "$ISSUE_NUM" ]; then
-          gh issue edit "$ISSUE_NUM" --add-assignee "copilot" 2>/dev/null || true
+          gh api "repos/ariannamethod/ariannamethod/issues/${ISSUE_NUM}/assignees" -X POST --input - <<< '{"assignees":["copilot"]}' > /dev/null 2>&1 || true
         fi
 
     - name: Create per-organism issues
@@ -280,7 +280,7 @@ jobs:
           --body-file /tmp/haiku_issue.md \
           --label "copilot" 2>&1 | tee /tmp/haiku_issue_url.txt
         H_NUM=$(cat /tmp/haiku_issue_url.txt | grep -oE '[0-9]+$')
-        [ -n "$H_NUM" ] && gh issue edit "$H_NUM" --repo ariannamethod/haiku.c --add-assignee "copilot" 2>/dev/null || true
+        [ -n "$H_NUM" ] && gh api "repos/ariannamethod/haiku.c/issues/${H_NUM}/assignees" -X POST --input - <<< '{"assignees":["copilot"]}' > /dev/null 2>&1 || true
 
         # === PENELOPE (ariannamethod/1984) ===
         cat > /tmp/pen_issue.md << PEOF
@@ -304,7 +304,7 @@ jobs:
           --body-file /tmp/pen_issue.md \
           --label "copilot" 2>&1 | tee /tmp/pen_issue_url.txt
         P_NUM=$(cat /tmp/pen_issue_url.txt | grep -oE '[0-9]+$')
-        [ -n "$P_NUM" ] && gh issue edit "$P_NUM" --repo ariannamethod/1984 --add-assignee "copilot" 2>/dev/null || true
+        [ -n "$P_NUM" ] && gh api "repos/ariannamethod/1984/issues/${P_NUM}/assignees" -X POST --input - <<< '{"assignees":["copilot"]}' > /dev/null 2>&1 || true
 
         # === MOLEQULA (ariannamethod/molequla) ===
         cat > /tmp/mol_issue.md << MEOF
@@ -328,7 +328,7 @@ jobs:
           --body-file /tmp/mol_issue.md \
           --label "copilot" 2>&1 | tee /tmp/mol_issue_url.txt
         M_NUM=$(cat /tmp/mol_issue_url.txt | grep -oE '[0-9]+$')
-        [ -n "$M_NUM" ] && gh issue edit "$M_NUM" --repo ariannamethod/molequla --add-assignee "copilot" 2>/dev/null || true
+        [ -n "$M_NUM" ] && gh api "repos/ariannamethod/molequla/issues/${M_NUM}/assignees" -X POST --input - <<< '{"assignees":["copilot"]}' > /dev/null 2>&1 || true
 
         # === NANOJANUS (ariannamethod/janus) ===
         cat > /tmp/nj_issue.md << NJEOF
@@ -352,6 +352,6 @@ jobs:
           --body-file /tmp/nj_issue.md \
           --label "copilot" 2>&1 | tee /tmp/nj_issue_url.txt
         NJ_NUM=$(cat /tmp/nj_issue_url.txt | grep -oE '[0-9]+$')
-        [ -n "$NJ_NUM" ] && gh issue edit "$NJ_NUM" --repo ariannamethod/janus --add-assignee "copilot" 2>/dev/null || true
+        [ -n "$NJ_NUM" ] && gh api "repos/ariannamethod/janus/issues/${NJ_NUM}/assignees" -X POST --input - <<< '{"assignees":["copilot"]}' > /dev/null 2>&1 || true
 
         echo "=== Per-organism issues created ==="
