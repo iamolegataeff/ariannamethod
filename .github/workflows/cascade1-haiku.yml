@@ -31,17 +31,23 @@ jobs:
         C1="cascade/cascade1"
         mkdir -p "$C1/seed" "$C1/haiku-lab"
 
-        SEED=""
-        if [ -n "$YESTERDAY" ]; then
-          NJ=""; PEN=""
-          [ -f "$C1/nanojanus-lab/${YESTERDAY}.txt" ] && NJ=$(cat "$C1/nanojanus-lab/${YESTERDAY}.txt")
-          [ -f "$C1/penelope-lab/${YESTERDAY}.txt" ] && PEN=$(cat "$C1/penelope-lab/${YESTERDAY}.txt")
-          [ -n "$NJ" ] || [ -n "$PEN" ] && SEED="${NJ} ${PEN}"
-        fi
-        [ -z "$SEED" ] && SEED=$(cat "$C1/genesis.txt")
+        # Respect manually placed seeds (don't overwrite)
+        if [ -f "$C1/seed/${DATESTAMP}.txt" ] && [ -s "$C1/seed/${DATESTAMP}.txt" ]; then
+          echo "=== Manual seed found, using it ==="
+          cat "$C1/seed/${DATESTAMP}.txt"
+        else
+          SEED=""
+          if [ -n "$YESTERDAY" ]; then
+            NJ=""; PEN=""
+            [ -f "$C1/nanojanus-lab/${YESTERDAY}.txt" ] && NJ=$(cat "$C1/nanojanus-lab/${YESTERDAY}.txt")
+            [ -f "$C1/penelope-lab/${YESTERDAY}.txt" ] && PEN=$(cat "$C1/penelope-lab/${YESTERDAY}.txt")
+            [ -n "$NJ" ] || [ -n "$PEN" ] && SEED="${NJ} ${PEN}"
+          fi
+          [ -z "$SEED" ] && SEED=$(cat "$C1/genesis.txt")
 
-        echo "$SEED" > "$C1/seed/${DATESTAMP}.txt"
-        echo "=== Seed ===" && cat "$C1/seed/${DATESTAMP}.txt"
+          echo "$SEED" > "$C1/seed/${DATESTAMP}.txt"
+          echo "=== Seed ===" && cat "$C1/seed/${DATESTAMP}.txt"
+        fi
 
     - name: Generate haiku
       run: |

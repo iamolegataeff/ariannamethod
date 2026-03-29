@@ -51,12 +51,21 @@ jobs:
         echo "Input: $INPUT"
 
         cc janus-src/nanojanus.c -O2 -lm -o nanojanus
-        RAW=$(./nanojanus --weights janus-src/weights/nanojanus.bin --vocab janus-src/nanojanus.txt --generate "$INPUT" 2>&1)
-        echo "$RAW" > "$C1/nanojanus-lab/${DATESTAMP}_raw.txt"
+
+        # Run NanoJanus — stdout = generation, stderr = debug
+        ./nanojanus --weights janus-src/weights/nanojanus.bin --vocab janus-src/nanojanus.txt \
+          --generate "$INPUT" > /tmp/nj_stdout.txt 2> /tmp/nj_stderr.txt || true
+
+        # Raw log = both streams for diagnostics
+        cat /tmp/nj_stderr.txt /tmp/nj_stdout.txt > "$C1/nanojanus-lab/${DATESTAMP}_raw.txt"
 
         # Extract words from bidirectional chain (lines with ^N or vN prefix)
-        WORDS=$(echo "$RAW" | grep -E '^\s+[\^v]' | awk '{print $2}' | head -12 | tr '\n' ' ')
-        [ -z "$WORDS" ] && WORDS=$(echo "$RAW" | grep -oE '\b[a-z]{3,}\b' | grep -v 'debt' | grep -v 'drift' | grep -v 'params' | head -12 | tr '\n' ' ')
+        WORDS=$(cat /tmp/nj_stdout.txt | grep -E '^\s+[\^v]' | awk '{print $2}' | head -12 | tr '\n' ' ')
+        [ -z "$WORDS" ] && WORDS=$(cat /tmp/nj_stdout.txt \
+          | grep -oE '\b[a-z]{3,}\b' \
+          | grep -vE '^(debt|drift|params|extended|vocab|loaded|weights|resonance|engine|trained|hardcoded|words|format)' \
+          | head -12 \
+          | tr '\n' ' ')
 
         echo "$WORDS" > "$C1/nanojanus-lab/${DATESTAMP}.txt"
         echo "=== NanoJanus 12 words ===" && cat "$C1/nanojanus-lab/${DATESTAMP}.txt"
