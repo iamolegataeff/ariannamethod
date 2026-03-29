@@ -191,20 +191,25 @@ jobs:
           --title "Behavioral Report: Cascade 1 — ${TODAY}" \
           --body-file /tmp/issue_body.md \
           --label "copilot" \
-          --assignee "@me" \
           2>&1)
 
         echo "Main issue created: $ISSUE_URL"
         ISSUE_NUM=$(echo "$ISSUE_URL" | grep -oE '[0-9]+$')
         if [ -n "$ISSUE_NUM" ]; then
-          gh issue edit "$ISSUE_NUM" --remove-assignee "@me" --add-assignee "copilot" 2>/dev/null || true
+          gh issue edit "$ISSUE_NUM" --add-assignee "copilot" 2>/dev/null || true
         fi
 
     - name: Create per-organism issues
       if: steps.collect.outputs.skip != 'true'
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        HAS_PAT: ${{ secrets.PAT_TOKEN != '' }}
       run: |
+        if [ "$HAS_PAT" != "true" ]; then
+          echo "PAT_TOKEN not configured — skipping cross-repo issues"
+          exit 0
+        fi
+
         TODAY=$(date -u +%Y-%m-%d)
         C1="cascade/cascade1"
 
