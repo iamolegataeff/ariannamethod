@@ -134,10 +134,19 @@ jobs:
         ISSUEEOF
         )
 
-          gh issue create \
+          ISSUE_URL=$(gh issue create \
             --title "CASCADE 1 ALERT: organism failures on ${DATESTAMP}" \
-            --body "$BODY"
-          echo "ALERT — issue created"
+            --body "$BODY" \
+            --label "copilot" \
+            2>&1)
+          echo "ALERT — issue created: $ISSUE_URL"
+
+          # Assign to Copilot for investigation
+          ISSUE_NUM=$(echo "$ISSUE_URL" | grep -oE '[0-9]+$')
+          if [ -n "$ISSUE_NUM" ]; then
+            gh issue edit "$ISSUE_NUM" --add-assignee "copilot" 2>/dev/null || true
+            echo "Assigned to Copilot for investigation"
+          fi
         else
           echo "=== All organisms healthy for ${DATESTAMP} ==="
           printf "${HEALTHY}"
