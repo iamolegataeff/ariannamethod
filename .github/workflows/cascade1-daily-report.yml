@@ -55,6 +55,50 @@ jobs:
           done
         fi
 
+        # === Vocabulary quality metrics ===
+        BPE_FRAGS="ough|ital|ard|ently|cre|ely|ary|ily|ith|ying|ald|ond|und|ung"
+
+        # Penelope metrics
+        PEN_REAL=0; PEN_FRAG=0; PEN_DEBUG=0
+        for w in $PENELOPE; do
+          if echo "$w" | grep -qE "^(extended|penelope|by|loaded|mode:?|vocab|params|trained|hardcoded|words)$"; then
+            PEN_DEBUG=$((PEN_DEBUG + 1))
+          elif echo "$w" | grep -qE "^($BPE_FRAGS)$"; then
+            PEN_FRAG=$((PEN_FRAG + 1))
+          else
+            PEN_REAL=$((PEN_REAL + 1))
+          fi
+        done
+
+        # NanoJanus metrics
+        NJ_REAL=0; NJ_FRAG=0
+        for w in $NANOJANUS; do
+          if echo "$w" | grep -qE "^($BPE_FRAGS)$"; then
+            NJ_FRAG=$((NJ_FRAG + 1))
+          else
+            NJ_REAL=$((NJ_REAL + 1))
+          fi
+        done
+
+        # Seed purity
+        SEED_CLEAN=0; SEED_DEBUG=0; SEED_TOTAL=0
+        for w in $SEED; do
+          SEED_TOTAL=$((SEED_TOTAL + 1))
+          if echo "$w" | grep -qE "^(extended|penelope|by|loaded|mode:?|vocab|params|trained|hardcoded|words)$"; then
+            SEED_DEBUG=$((SEED_DEBUG + 1))
+          else
+            SEED_CLEAN=$((SEED_CLEAN + 1))
+          fi
+        done
+
+        # Haiku stop-word ratio
+        HAIKU_STOPS=0; HAIKU_TOTAL=0
+        STOP_WORDS="i|me|my|we|our|you|your|he|she|it|they|them|the|a|an|and|or|but|in|on|at|to|for|of|is|am|are|was|were|be|been|being|have|has|had|do|does|did|will|would|shall|should|can|could|may|might|must|not|no|nor|so|if|then|than|that|this|what|which|who|whom|how|when|where|why|up|out|just|get|go|about|know|said|yes|him"
+        for w in $(echo "$HAIKU" | tr '\n' ' '); do
+          HAIKU_TOTAL=$((HAIKU_TOTAL + 1))
+          echo "$w" | grep -qiE "^($STOP_WORDS)$" && HAIKU_STOPS=$((HAIKU_STOPS + 1))
+        done
+
         # Workflow statuses
         WF_INFO=""
         for WF in cascade1-haiku cascade1-penelope cascade1-molequla cascade1-nanojanus; do
@@ -82,6 +126,19 @@ jobs:
           echo "| Workflow | Result |"
           echo "|----------|--------|"
           echo "$WF_INFO"
+          echo ""
+          echo "## Vocabulary Health"
+          echo ""
+          echo "| Metric | Value |"
+          echo "|--------|-------|"
+          echo "| Penelope: real words | ${PEN_REAL}/${PEN_WORDS} |"
+          echo "| Penelope: BPE fragments | ${PEN_FRAG} |"
+          echo "| Penelope: debug leaks | ${PEN_DEBUG} |"
+          echo "| NanoJanus: real words | ${NJ_REAL}/${NJ_WORDS} |"
+          echo "| NanoJanus: BPE fragments | ${NJ_FRAG} |"
+          echo "| Seed purity | ${SEED_CLEAN}/${SEED_TOTAL} clean |"
+          echo "| Seed debug leaks | ${SEED_DEBUG} |"
+          echo "| Haiku stop-word ratio | ${HAIKU_STOPS}/${HAIKU_TOTAL} |"
           echo ""
           echo "---"
           echo ""
