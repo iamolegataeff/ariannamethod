@@ -214,7 +214,56 @@ jobs:
         git push || (git pull --rebase origin main && git push) || true
         echo "═══ Cascade 1 complete: ${DATESTAMP} ═══"
 
-    # ── 8. WATCHDOG ──────────────────────────────────────────
+    # ── 8. COPILOT GUARDS ─────────────────────────────────────
+
+    - name: Deploy Copilot guards
+      if: always()
+      env:
+        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        HAS_PAT: ${{ secrets.PAT_TOKEN != '' }}
+      run: |
+        if [ "$HAS_PAT" != "true" ]; then
+          echo "PAT_TOKEN not set — skipping copilot guards"
+          exit 0
+        fi
+
+        # Main behavioral report issue
+        cat > /tmp/guard_body.md << GEOF
+        ## Cascade 1 Guard Report — ${DATESTAMP}
+
+        Review today's cascade output. Read \`.github/copilot-instructions.md\`.
+        Write report to \`cascade/cascade1/reports/${DATESTAMP}-guard.md\`.
+
+        **Seed:** $(cat "$C1/seed/${DATESTAMP}.txt" 2>/dev/null | head -1 | cut -c1-200)
+        **Haiku:** $(cat "$C1/haiku-lab/${DATESTAMP}.txt" 2>/dev/null | head -1)
+        **Penelope:** $(cat "$C1/penelope-lab/${DATESTAMP}.txt" 2>/dev/null)
+        **NanoJanus:** $(cat "$C1/nanojanus-lab/${DATESTAMP}.txt" 2>/dev/null)
+        **Molequla:** $(wc -l "$C1/molequla-lab/${DATESTAMP}/"*.log 2>/dev/null | tail -1 || echo "no data")
+        **Errors:** $(cat "$C1/cascade_errors.txt" 2>/dev/null || echo "none")
+
+        Create a PR with the report file.
+        GEOF
+
+        ISSUE_URL=$(gh issue create --repo ariannamethod/ariannamethod \
+          --title "Guard Report: Cascade 1 — ${DATESTAMP}" \
+          --body-file /tmp/guard_body.md \
+          --label "copilot" 2>&1 || true)
+        echo "guard issue: $ISSUE_URL"
+        ISSUE_NUM=$(echo "$ISSUE_URL" | grep -oE '[0-9]+$')
+        [ -n "$ISSUE_NUM" ] && gh api "repos/ariannamethod/ariannamethod/issues/${ISSUE_NUM}/assignees" \
+          -X POST --input - <<< '{"assignees":["copilot"]}' > /dev/null 2>&1 || true
+
+        # Per-organism guard issues
+        for ORG_REPO in "haiku.c" "1984" "molequla" "janus"; do
+          ORG_NAME=$(echo $ORG_REPO | sed 's/\.c$//' | sed 's/1984/penelope/' | sed 's/janus/nanojanus/')
+          gh issue create --repo "ariannamethod/${ORG_REPO}" \
+            --title "Guard: ${ORG_NAME} — ${DATESTAMP}" \
+            --body "Review ${ORG_NAME} output for ${DATESTAMP}. Check labs/ and write report to labs/${DATESTAMP}-guard.md. Create PR." \
+            --label "copilot" 2>&1 || true
+        done
+        echo "copilot guards deployed"
+
+    # ── 9. WATCHDOG ──────────────────────────────────────────
 
     - name: Watchdog
       if: failure()
