@@ -1,0 +1,103 @@
+name: cascade2 — molequla
+
+on:
+  schedule:
+    - cron: '15 1 * * *'   # 01:15 UTC, isolated from others
+  workflow_dispatch:
+
+concurrency:
+  group: cascade2-molequla
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  molequla:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35   # 30 min train budget + 5 min buffer
+    steps:
+      - name: Guard PAT_TOKEN
+        run: |
+          if [ -z "${{ secrets.PAT_TOKEN }}" ]; then
+            echo "::error::PAT_TOKEN missing"
+            exit 1
+          fi
+
+      - name: Checkout infra
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Compute date
+        id: d
+        run: |
+          echo "today=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+          # Rotate element by day-of-year mod 4: earth/air/water/fire
+          DOY=$(date -u +%j | sed 's/^0*//')
+          case $(( (DOY - 1) % 4 )) in
+            0) ELEMENT=earth ;;
+            1) ELEMENT=air   ;;
+            2) ELEMENT=water ;;
+            3) ELEMENT=fire  ;;
+          esac
+          echo "element=$ELEMENT" >> $GITHUB_OUTPUT
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Clone molequla
+        run: |
+          git clone --depth=1 https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/ariannamethod/molequla.git /tmp/molequla
+
+      - name: Build (CGO + AML)
+        run: |
+          cd /tmp/molequla
+          # Build with CGO for full AML/C autograd
+          CGO_ENABLED=1 go build -a -o molequla_cgo .
+
+      - name: Train one element (30 min budget)
+        run: |
+          cd /tmp/molequla
+          ELEMENT="${{ steps.d.outputs.element }}"
+          CORPUS="nonames_${ELEMENT}.txt"
+          if [ ! -f "$CORPUS" ]; then
+            echo "::warning::$CORPUS missing, falling back to nonames.txt"
+            CORPUS="nonames.txt"
+          fi
+          # 28-minute hard cap (inside 35-minute job timeout)
+          timeout 28m ./molequla_cgo \
+            --element "$ELEMENT" \
+            --evolution \
+            > /tmp/molequla_raw.txt 2>&1 || true
+          echo "--- molequla tail (element=$ELEMENT) ---"
+          tail -60 /tmp/molequla_raw.txt
+
+      - name: Commit output to molequla-lab
+        run: |
+          DAY_DIR="cascade/cascade2/molequla-lab/${{ steps.d.outputs.today }}"
+          mkdir -p "$DAY_DIR"
+          cp /tmp/molequla_raw.txt "$DAY_DIR/output.txt"
+          echo "${{ steps.d.outputs.element }}" > "$DAY_DIR/element.txt"
+          git config user.email "cascade@ariannamethod.ai"
+          git config user.name  "cascade-bot"
+          git add "$DAY_DIR"
+          if git diff --cached --quiet; then
+            echo "no changes"; exit 0
+          fi
+          git commit -m "cascade2/molequla: ${{ steps.d.outputs.today }} (${{ steps.d.outputs.element }})"
+          git pull --rebase origin main || true
+          git push
+
+      - name: Alert on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          gh issue create \
+            --repo ariannamethod/ariannamethod \
+            --title "cascade-alert: molequla ${{ steps.d.outputs.today }} (${{ steps.d.outputs.element }})" \
+            --label "cascade-alert" \
+            --body "Molequla step of cascade2 failed for element ${{ steps.d.outputs.element }}. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

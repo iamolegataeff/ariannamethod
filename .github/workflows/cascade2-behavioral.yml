@@ -1,0 +1,118 @@
+name: cascade2 — behavioral report
+
+on:
+  schedule:
+    - cron: '0 9 */3 * *'   # every 3 days at 09:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: cascade2-behavioral
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  behavioral:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Guard PAT_TOKEN
+        run: |
+          if [ -z "${{ secrets.PAT_TOKEN }}" ]; then
+            echo "::error::PAT_TOKEN missing"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          fetch-depth: 0
+
+      - name: Compute window
+        id: d
+        run: |
+          echo "today=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+          for i in 0 1 2; do
+            D=$(date -u -d "-${i} day" +%Y-%m-%d 2>/dev/null || date -u -v-${i}d +%Y-%m-%d)
+            echo "d${i}=${D}" >> $GITHUB_OUTPUT
+          done
+
+      - name: Build per-organism 3-day rollup
+        id: rollup
+        run: |
+          mkdir -p /tmp/rollup
+          for org in haiku penelope klaus molequla nanojanus; do
+            {
+              echo "# cascade2 — ${org} 3-day rollup (${{ steps.d.outputs.today }})"
+              echo ""
+              for i in 2 1 0; do
+                D=${D:-}
+                case $i in
+                  0) D="${{ steps.d.outputs.d0 }}" ;;
+                  1) D="${{ steps.d.outputs.d1 }}" ;;
+                  2) D="${{ steps.d.outputs.d2 }}" ;;
+                esac
+                F="cascade/cascade2/${org}-lab/${D}/output.txt"
+                echo "## ${D}"
+                if [ -f "$F" ]; then
+                  echo '```'
+                  tail -30 "$F"
+                  echo '```'
+                else
+                  echo "_no output_"
+                fi
+                echo ""
+              done
+            } > "/tmp/rollup/${org}.md"
+          done
+
+      - name: Commit rollups to cascade reports
+        run: |
+          REPORTS_DIR="cascade/cascade2/reports/${{ steps.d.outputs.today }}"
+          mkdir -p "$REPORTS_DIR"
+          cp /tmp/rollup/*.md "$REPORTS_DIR/"
+          git config user.email "cascade@ariannamethod.ai"
+          git config user.name  "cascade-bot"
+          git add "$REPORTS_DIR"
+          if git diff --cached --quiet; then
+            echo "no new reports"; exit 0
+          fi
+          git commit -m "cascade2: behavioral reports ${{ steps.d.outputs.today }}"
+          git pull --rebase origin main || true
+          git push
+
+      - name: Create per-organism Copilot issues
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          declare -A REPO_OF
+          REPO_OF[haiku]="ariannamethod/haiku.c"
+          REPO_OF[penelope]="ariannamethod/1984"
+          REPO_OF[klaus]="iamolegataeff/klaus.c"
+          REPO_OF[molequla]="ariannamethod/molequla"
+          REPO_OF[nanojanus]="ariannamethod/janus"
+
+          for org in haiku penelope klaus molequla nanojanus; do
+            REPO="${REPO_OF[$org]}"
+            TITLE="cascade2: ${org} 3-day behavioral report (${{ steps.d.outputs.today }})"
+            BODY_FILE="/tmp/rollup/${org}.md"
+            if [ ! -f "$BODY_FILE" ]; then continue; fi
+            gh issue create \
+              --repo "$REPO" \
+              --title "$TITLE" \
+              --label "copilot,cascade-report" \
+              --body-file "$BODY_FILE" || echo "::warning::failed to create issue for $org in $REPO"
+          done
+
+      - name: Alert on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          gh issue create \
+            --repo ariannamethod/ariannamethod \
+            --title "cascade-alert: behavioral report ${{ steps.d.outputs.today }}" \
+            --label "cascade-alert" \
+            --body "Behavioral report step of cascade2 failed. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

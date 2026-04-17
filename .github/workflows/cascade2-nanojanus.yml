@@ -1,0 +1,115 @@
+name: cascade2 — nanojanus
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # 02:00 UTC — after molequla
+  workflow_dispatch:
+
+concurrency:
+  group: cascade2-nanojanus
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  nanojanus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Guard PAT_TOKEN
+        run: |
+          if [ -z "${{ secrets.PAT_TOKEN }}" ]; then
+            echo "::error::PAT_TOKEN missing"
+            exit 1
+          fi
+
+      - name: Checkout infra
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Compute date
+        id: d
+        run: echo "today=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Fetch upstream chain (haiku + penelope + klaus + molequla)
+        id: upstream
+        run: |
+          TODAY="${{ steps.d.outputs.today }}"
+          CHAIN=""
+          for org in haiku penelope klaus molequla; do
+            F="cascade/cascade2/${org}-lab/$TODAY/output.txt"
+            if [ -f "$F" ]; then
+              # Take last 10 non-empty lines from each
+              SNIPPET=$(grep -v '^$' "$F" | tail -10)
+              CHAIN="$CHAIN\n--- $org ---\n$SNIPPET"
+            fi
+          done
+          if [ -z "$CHAIN" ]; then
+            if [ -f "cascade/cascade2/genesis.txt" ]; then
+              CHAIN=$(cat cascade/cascade2/genesis.txt)
+            else
+              CHAIN="pressure came first, pressure made motion"
+            fi
+          fi
+          # Collapse to plain prompt for nanojanus --generate
+          PROMPT=$(printf "%b" "$CHAIN" | tr '\n' ' ' | head -c 500)
+          {
+            echo "prompt<<EOF"
+            echo "$PROMPT"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Clone janus
+        run: |
+          git clone --depth=1 https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/ariannamethod/janus.git /tmp/janus
+
+      - name: Run nanojanus (bi-directional chain)
+        run: |
+          cd /tmp/janus
+          python3 nanojanus.py --generate "${{ steps.upstream.outputs.prompt }}" > /tmp/nanojanus_raw.txt 2>&1 || true
+          echo "--- nanojanus output (last 40 lines) ---"
+          tail -40 /tmp/nanojanus_raw.txt
+
+      - name: Write next-day seed + commit output
+        run: |
+          DAY_DIR="cascade/cascade2/nanojanus-lab/${{ steps.d.outputs.today }}"
+          mkdir -p "$DAY_DIR"
+          cp /tmp/nanojanus_raw.txt "$DAY_DIR/output.txt"
+          printf "%s\n" "${{ steps.upstream.outputs.prompt }}" > "$DAY_DIR/seed_input.txt"
+          # Next-day seed: last 12 meaningful words from nanojanus output
+          NEXT_SEED=$(grep -v '^$' /tmp/nanojanus_raw.txt | tail -20 | tr '\n' ' ' | tr -s ' ')
+          # Trim to reasonable seed size
+          NEXT_SEED=$(echo "$NEXT_SEED" | cut -c1-300)
+          if [ -z "$NEXT_SEED" ]; then
+            # Fallback: keep genesis as seed if nanojanus produced nothing
+            NEXT_SEED="$(cat cascade/cascade2/genesis.txt 2>/dev/null || echo 'pressure came first, pressure made motion')"
+          fi
+          mkdir -p cascade/cascade2/seed
+          printf "%s\n" "$NEXT_SEED" > cascade/cascade2/seed/today.txt
+          git config user.email "cascade@ariannamethod.ai"
+          git config user.name  "cascade-bot"
+          git add "$DAY_DIR" cascade/cascade2/seed/today.txt
+          if git diff --cached --quiet; then
+            echo "no changes"; exit 0
+          fi
+          git commit -m "cascade2/nanojanus: ${{ steps.d.outputs.today }} (+ next seed)"
+          git pull --rebase origin main || true
+          git push
+
+      - name: Alert on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          gh issue create \
+            --repo ariannamethod/ariannamethod \
+            --title "cascade-alert: nanojanus ${{ steps.d.outputs.today }}" \
+            --label "cascade-alert" \
+            --body "NanoJanus step of cascade2 failed. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
