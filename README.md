@@ -7,7 +7,16 @@
 ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ 
 ```
 
+<div align="center">
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19638451.svg)](https://doi.org/10.5281/zenodo.19638451)
+
 **Arianna Method** is a Law of Nature.
+
+> 📜 *Our first DOI — the whole ecosystem, described and preserved.*
+> **[Arianna Method on Zenodo →](https://zenodo.org/records/19638451)**
+
+</div>
 
 ```bash
 sudo rm -rf /binarity
