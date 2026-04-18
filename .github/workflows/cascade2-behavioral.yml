@@ -107,7 +107,7 @@ jobs:
           done
 
       - name: Alert on failure
-        if: failure()
+        if: failure() || cancelled()
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
