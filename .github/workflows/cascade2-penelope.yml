@@ -65,7 +65,7 @@ jobs:
       - name: Run penelope (python version, 12-word chain)
         run: |
           cd /tmp/penelope
-          python3 penelope.py "${{ steps.upstream.outputs.seed }}" > /tmp/penelope_raw.txt 2>&1 || true
+          python3 penelope.py --load weights/penelope.bin "${{ steps.upstream.outputs.seed }}" > /tmp/penelope_raw.txt 2>&1 || true
           echo "--- penelope output (last 40 lines) ---"
           tail -40 /tmp/penelope_raw.txt
 

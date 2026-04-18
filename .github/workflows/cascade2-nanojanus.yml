@@ -73,7 +73,7 @@ jobs:
       - name: Run nanojanus (bi-directional chain)
         run: |
           cd /tmp/janus
-          python3 nanojanus.py --generate "${{ steps.upstream.outputs.prompt }}" > /tmp/nanojanus_raw.txt 2>&1 || true
+          python3 nanojanus.py --weights weights/nanojanus.bin --generate "${{ steps.upstream.outputs.prompt }}" > /tmp/nanojanus_raw.txt 2>&1 || true
           echo "--- nanojanus output (last 40 lines) ---"
           tail -40 /tmp/nanojanus_raw.txt
 
