@@ -70,10 +70,20 @@ jobs:
         run: |
           git clone --depth=1 https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/ariannamethod/janus.git /tmp/janus
 
-      - name: Run nanojanus (bi-directional chain)
+      - name: Build nanojanus (C)
         run: |
           cd /tmp/janus
-          python3 nanojanus.py --weights weights/nanojanus.bin --generate "${{ steps.upstream.outputs.prompt }}" > /tmp/nanojanus_raw.txt 2>&1 || true
+          cc nanojanus.c -O2 -lm -o /tmp/nanojanus_bin
+          ls -la /tmp/nanojanus_bin
+
+      - name: Run nanojanus (bi-directional chain, C binary)
+        run: |
+          cd /tmp/janus
+          /tmp/nanojanus_bin \
+            --weights weights/nanojanus.bin \
+            --vocab nanojanus.txt \
+            --generate "${{ steps.upstream.outputs.prompt }}" \
+            > /tmp/nanojanus_raw.txt 2>&1 || true
           echo "--- nanojanus output (last 40 lines) ---"
           tail -40 /tmp/nanojanus_raw.txt
 
