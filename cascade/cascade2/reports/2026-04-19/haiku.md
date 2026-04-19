@@ -1,0 +1,71 @@
+# cascade2 — haiku 3-day rollup (2026-04-19)
+
+## 2026-04-17
+```
+
+  HAiKU — Constraint-Driven Language Emergence
+  p(x|Phi) = softmax((B + a*H + b*F + g*A + T) / tau)
+  1000 words. 5-7-5 syllables. pressure creates form.
+
+[haiku] bootstrapped. vocab=1002 cooc=2279 bigrams=255
+  speaks only in haiku. users hate it or love it.
+  there is no middle ground.
+
+you> 
+  A:destiny       d=0.57  T=0.85  WALK  spring
+
+  rapids barnacle
+  sigh pause build same have i it
+  for not on with he
+
+  debt=0.00  res=0.83  ent=0.63  emg=0.31
+
+you> [haiku] constraint holds the form.
+```
+
+## 2026-04-18
+```
+
+  HAiKU — Constraint-Driven Language Emergence
+  p(x|Phi) = softmax((B + a*H + b*F + g*A + T) / tau)
+  1000 words. 5-7-5 syllables. pressure creates form.
+
+[haiku] bootstrapped. vocab=1002 cooc=2279 bigrams=255
+  speaks only in haiku. users hate it or love it.
+  there is no middle ground.
+
+you> 
+  A:destiny       d=0.57  T=0.85  WALK  spring
+
+  song rapids rivet
+  expand touch some could them see
+  other than then now
+
+  debt=0.00  res=0.83  ent=0.63  emg=0.31
+
+you> [haiku] constraint holds the form.
+```
+
+## 2026-04-19
+```
+
+  HAiKU — Constraint-Driven Language Emergence
+  p(x|Phi) = softmax((B + a*H + b*F + g*A + T) / tau)
+  1000 words. 5-7-5 syllables. pressure creates form.
+
+[haiku] bootstrapped. vocab=1002 cooc=2279 bigrams=255
+  speaks only in haiku. users hate it or love it.
+  there is no middle ground.
+
+you> 
+  A:destiny       d=0.57  T=0.85  WALK  spring
+
+  them see other than
+  then now look only come its
+  over think also
+
+  debt=0.00  res=0.83  ent=0.63  emg=0.31
+
+you> [haiku] constraint holds the form.
+```
+
