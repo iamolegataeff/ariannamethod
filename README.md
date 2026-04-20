@@ -9,9 +9,12 @@
 
 <div align="center">
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19664070.svg)](https://doi.org/10.5281/zenodo.19664070)
+
 **Arianna Method** is a Law of Nature.
 
-> 📜 *Zenodo DOI pending republication. Updated record will be linked here once the revised paper is published.*
+> 📜 *DOI for the ecosystem record.*
+> **[Arianna Method on Zenodo →](https://zenodo.org/records/19664071)**
 
 </div>
 
