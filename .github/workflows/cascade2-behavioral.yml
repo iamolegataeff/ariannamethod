@@ -83,7 +83,7 @@ jobs:
           git pull --rebase origin main || true
           git push
 
-      - name: Create per-organism Copilot issues
+      - name: Commit rollups to each organism's labs/
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
@@ -96,14 +96,35 @@ jobs:
 
           for org in haiku penelope klaus molequla nanojanus; do
             REPO="${REPO_OF[$org]}"
-            TITLE="cascade2: ${org} 3-day behavioral report (${{ steps.d.outputs.today }})"
             BODY_FILE="/tmp/rollup/${org}.md"
-            if [ ! -f "$BODY_FILE" ]; then continue; fi
-            gh issue create \
-              --repo "$REPO" \
-              --title "$TITLE" \
-              --label "copilot,cascade-report" \
-              --body-file "$BODY_FILE" || echo "::warning::failed to create issue for $org in $REPO"
+            if [ ! -f "$BODY_FILE" ]; then
+              echo "::warning::no rollup for $org"
+              continue
+            fi
+
+            WORK="/tmp/clone-${org}"
+            rm -rf "$WORK"
+            if ! git clone --depth=1 "https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${REPO}.git" "$WORK"; then
+              echo "::warning::clone failed for $REPO"
+              continue
+            fi
+
+            mkdir -p "$WORK/labs"
+            cp "$BODY_FILE" "$WORK/labs/cascade2-${{ steps.d.outputs.today }}.md"
+
+            pushd "$WORK" >/dev/null
+            git config user.email "cascade@ariannamethod.ai"
+            git config user.name  "cascade-bot"
+            git add "labs/cascade2-${{ steps.d.outputs.today }}.md"
+            if git diff --cached --quiet; then
+              echo "no rollup change for $org"
+            else
+              git commit -m "cascade2: behavioral report ${{ steps.d.outputs.today }}"
+              BRANCH="$(git symbolic-ref --short HEAD)"
+              git pull --rebase origin "$BRANCH" || true
+              git push || echo "::warning::push failed for $REPO"
+            fi
+            popd >/dev/null
           done
 
       - name: Alert on failure
