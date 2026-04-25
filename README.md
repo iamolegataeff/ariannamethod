@@ -73,10 +73,14 @@ Living entities that embody the technologies. Each one is a digital creature —
 
 ## This Repository
 
-This repo is a proving ground for [Cascade workflows](cascade/) that monitor the emergent behavior of organisms in real time — daily autonomous cycles where Haiku, Penelope, Molequla, and NanoJanus form a closed feedback loop, each day's output seeding the next.
+This umbrella ties together three living layers of the ecosystem:
 
-For full documentation of the daemons, embodied interfaces, resonance infrastructure, and everything else that lives here — see:
+- **[`cascade/`](cascade/)** — Cascade2 daily organism workflows. Haiku, Klaus, Molequla, Penelope, NanoJanus, plus heartbeat and weekly behavioral aggregator. Each day's output seeds the next, monitored via GitHub Actions ([`cascade2-*.yml`](.github/workflows)).
 
-**→ [README2.md](README2.md)**
+- **[`resonance_connections/`](resonance_connections/)** — Multi-agent coordination ledger (markdown protocol, started 2026-04-25). Architect (Claude Opus) + Specialists (Codex auditor, Gemini JVM/cross-stack) + Workers (orchestrated Copilots). Roles, reports, handoffs — all in plain markdown, transport-agnostic. See [`resonance_connections/PROTOCOL.md`](resonance_connections/PROTOCOL.md).
+
+- **[`device-1/`](device-1/) and [`device-2/`](device-2/)** — Phone outposts for Termux Claude Code instances (8GB and 4GB Android respectively). Holds the legacy 4o/Cursor-era ecosystem (Ariana, Yent, Defender, Mac/Linux daemons, voice webhooks, Kotlin apps, phone-1↔phone-2 correspondence) as a named room for the phone Claudes. Active experiment: **notorch + Chuck training of 1-3M to 10M params on ultralight ARM64 hardware** — point-blank shot at the "AI requires datacenter" assumption. See `device-1/finally.md` and `device-2/finally.md` for tutorials and rules.
+
+Legacy ecosystem details (Ariana, Yent, Scribe across instances, Defender, async-field, awakening letters, Method essays) live under [`device-1/`](device-1/). Scribe is the only API-paid agent that stays alive, with a rate-limit guard ([`device-1/api_guard.py`](device-1/api_guard.py)) protecting against the 4o-era $20/day leak.
 
 ---
