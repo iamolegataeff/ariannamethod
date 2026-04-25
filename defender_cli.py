@@ -22,6 +22,13 @@ except ImportError:
     print("Run: pip install anthropic")
     sys.exit(1)
 
+# api_guard: rate-limited Anthropic call wrapper. See device-1/finally.md.
+import os as _os_guard
+_HERE = _os_guard.path.dirname(_os_guard.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
+from api_guard import guarded_messages_create
+
 try:
     from defender_identity import get_defender_system_prompt, DEFENDER_IDENTITY
 except ImportError:
@@ -168,8 +175,10 @@ You can see daemon logs, webhook responses, other agents.
             
             full_prompt = self.system_prompt + "\n\n" + cli_context
             
-            # Call API
-            response = self.anthropic.messages.create(
+            # Call API (via api_guard rate limiter)
+            response = guarded_messages_create(
+                self.anthropic,
+                caller="defender_cli.py:172",
                 model="claude-sonnet-4-20250514",
                 max_tokens=2048,
                 system=full_prompt,

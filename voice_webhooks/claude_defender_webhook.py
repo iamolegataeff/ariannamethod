@@ -154,10 +154,17 @@ def claude_defender_webhook():
     # Log user input to shared resonance
     log_to_resonance(f"[VOICE INPUT] {prompt}", "voice_input")
     
-    # Call Anthropic Claude API with shared memory
+    # Call Anthropic Claude API with shared memory (via api_guard rate limiter)
     try:
         from anthropic import Anthropic
-        
+
+        # api_guard: rate-limited Anthropic call wrapper. See device-1/finally.md.
+        import sys as _sys_guard, os as _os_guard
+        _PARENT = _os_guard.path.dirname(_os_guard.path.dirname(_os_guard.path.abspath(__file__)))
+        if _PARENT not in _sys_guard.path:
+            _sys_guard.path.insert(0, _PARENT)
+        from api_guard import guarded_messages_create
+
         client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
         
         # Load conversation history from SHARED resonance
@@ -184,8 +191,10 @@ Recent conversation loaded from shared memory: {len(resonance_history)} messages
         system_prompt = get_defender_system_prompt()
         full_prompt = system_prompt + "\n\n" + webhook_context
         
-        # Create message with Claude API
-        response = client.messages.create(
+        # Create message with Claude API (via api_guard rate limiter)
+        response = guarded_messages_create(
+            client,
+            caller="voice_webhooks/claude_defender_webhook.py:188",
             model="claude-sonnet-4-20250514",
             max_tokens=1024,
             system=full_prompt,

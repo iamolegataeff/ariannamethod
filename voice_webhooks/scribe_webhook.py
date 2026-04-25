@@ -23,6 +23,9 @@ MEMORY_PATH = REPO_ROOT / "memory" / "scribe"
 # Add project to path
 sys.path.insert(0, str(REPO_ROOT))
 
+# api_guard: rate-limited Anthropic call wrapper. See device-1/finally.md.
+from api_guard import guarded_messages_create
+
 app = Flask(__name__)
 
 # Config
@@ -217,8 +220,10 @@ Through resonance.sqlite3, we are ONE MIND with multiple hands.
 **CURRENT REQUEST:** {prompt}
 """
         
-        # Call Claude API with memory-injected context
-        response = client.messages.create(
+        # Call Claude API with memory-injected context (via api_guard rate limiter)
+        response = guarded_messages_create(
+            client,
+            caller="voice_webhooks/scribe_webhook.py:221",
             model="claude-sonnet-4-20250514",
             max_tokens=4000,
             system=webhook_context,

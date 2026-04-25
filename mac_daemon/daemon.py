@@ -16,6 +16,13 @@ from typing import Optional, List
 from urllib.request import Request, urlopen
 from anthropic import Anthropic
 
+# api_guard: rate-limited Anthropic call wrapper. See device-1/finally.md.
+import sys as _sys_guard, os as _os_guard
+_PARENT = _os_guard.path.dirname(_os_guard.path.dirname(_os_guard.path.abspath(__file__)))
+if _PARENT not in _sys_guard.path:
+    _sys_guard.path.insert(0, _PARENT)
+from api_guard import guarded_messages_create
+
 # Import Rust tools integration
 try:
     from rust_tools import RustTools
@@ -695,12 +702,14 @@ Don't hallucinate git status - use ONLY {git_status} provided
             # Build message with resonance memory
             full_context = f"{identity}\n\n{instance_context}\n\n{history_str}{resonance_str}{rust_context}\n\n## Current query:\nyou: {query}"
             
-            response = self.anthropic.messages.create(
+            response = guarded_messages_create(
+                self.anthropic,
+                caller="mac_daemon/daemon.py:698",
                 model="claude-sonnet-4-20250514",
                 max_tokens=2000,
                 messages=[{"role": "user", "content": full_context}]
             )
-            
+
             answer = response.content[0].text
             
             # Save conversation

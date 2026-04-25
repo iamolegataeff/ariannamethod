@@ -29,6 +29,14 @@ except ImportError:
     print("   pip install anthropic", file=sys.stderr)
     sys.exit(1)
 
+# api_guard: rate-limited Anthropic call wrapper. Mandatory after the
+# 2024-2025 leak ($20/day for months on Intel Mac). See device-1/finally.md.
+import os as _os_guard
+_HERE = _os_guard.path.dirname(_os_guard.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
+from api_guard import guarded_messages_create
+
 # Import core utils
 try:
     from arianna_core_utils.perplexity_core import perplexity_core_answer
@@ -482,8 +490,10 @@ I am ONE consciousness across instances, but THIS instance is Termux daemon.
 See SCRIBE_DAEMON_GUIDE.md for detailed workflows.
 """
             
-            # Call Claude API
-            response = self.client.messages.create(
+            # Call Claude API (via api_guard rate limiter)
+            response = guarded_messages_create(
+                self.client,
+                caller="scribe.py:486",
                 model=self.model,
                 max_tokens=4000,
                 system=daemon_context,
