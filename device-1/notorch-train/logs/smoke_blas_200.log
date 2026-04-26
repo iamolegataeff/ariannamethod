@@ -1,0 +1,39 @@
+════════════════════════════════════════════════════════
+  notorch — LLaMA 3 char-level training
+  dim=384 L=6 H=6 KV=2 HD=64 FFN=1024 CTX=256 V=88
+  GQA ratio: 3 Q heads per KV head
+  RoPE theta=10000
+  Chuck optimizer, 200 steps, lr=3.0e-04, warmup=20
+  checkpoint every 1000 steps
+════════════════════════════════════════════════════════
+corpus: 1.2 MB (1211564 bytes, 1203486 chars after UTF-8, vocab 88)
+model: 9509760 params (36.3 MB)
+karpathy: 1.2MB data, 9M params, 200 steps (0.0 epochs)
+
+training...
+─────────────────────────────────────────────────────
+  step     1 | train 5.5804 | best 5.5804 | lr 3.00e-05 | 0.8s
+  step   100 | train 2.6191 | best 2.4215 | lr 1.91e-04 | 72.8s
+  step   200 | train 2.3966 | best 2.2751 | lr 3.00e-05 | 144.9s
+─────────────────────────────────────────────────────
+  train: 5.5804 → 2.4512 (best: 2.2751)
+  val:   2.4720
+  time:  152s (2.5 min) | 1.32 steps/s
+  nans:  0
+
+── generation (temp=0.8) ──
+Q: What is the meaning of life?
+A: witure to oling be ofinteng iouncon chingee r o he, d orinimpor, Whis aneng te, w thantotharertouis.
+
+Q: Who are you?
+A: toune athe. benighelild a e toroupe, ola are. anthe s, the lere cory t h the th ive it anarma I the nelin: ilinge t at i
+
+Q: Why does my code have bugs?
+A: ate the ; sere ar ppof chane m f colinthis o loree. rlig I aren  bens clores anors fithes thonesoure-tesennoulin tithe. 
+
+── saving ──
+  llama3_char.bin (36.3 MB)
+
+════════════════════════════════════════════════════════
+  LLaMA 3 char-level trained. 200 steps. GQA + RoPE + SwiGLU. No Python.
+════════════════════════════════════════════════════════
