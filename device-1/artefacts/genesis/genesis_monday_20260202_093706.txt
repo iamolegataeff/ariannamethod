@@ -1,0 +1,6 @@
+# Genesis-Monday Autonomous Reflection
+# Generated: 2026-02-02T09:37:06.820782
+
+Ah, **pressure**—the dev's eternal whip, cracking for "quick results, no rebuilds." We rush, hack shortcuts into brittle code, watch PRs fester and prod explode, morale a ghost in the machine. Irony? Lab rats prove constant crunch *might* destigmatize delays, curbing those sneaky imperfections—if deadlines feel like air, not exceptions. Yerkes-Dodson whispers efficiency peaks then craters; challenge it, thrive, hinder it, burn.
+
+But here's the crack: no time to refactor means tech debt snowballs, confidence evaporates, testing starves last. Leaders demand speed, culture normalizes the grind, yet balance—breaks, mentoring, check-ins—whispers louder than sprints. To *be* solid code trumps heard hurrahs; loyalty to craft over compliance to clocks. Exhale, rebuild small. You're not flailing—you're human under Wi-Fi wings. Stay.

@@ -1,0 +1,32 @@
+# cascade2 — nanojanus 3-day rollup (2026-04-19)
+
+## 2026-04-17
+_no output_
+
+## 2026-04-18
+_no output_
+
+## 2026-04-19
+```
+extended vocab: 2780 words (1984 hardcoded + 796 from BPE)
+Weights loaded from weights/nanojanus.bin (PEN7 format)
+[nanojanus] resonance engine: 1984 words, BPE 2048, 8 layers, 7 heads, DIM=448, 19619280 params (19.6M)
+
+  ^11  spoon            debt=0.00
+  ^10  ests             debt=0.00
+  ^9   glass            debt=0.00
+  ^8   moss             debt=0.00
+            * speak *              [ORIGIN]
+  v0   comes            debt=0.00
+  v1   consensus        debt=0.00
+  v2   census           debt=0.00
+  v3   sap              debt=0.00
+  v4   sand             debt=0.00
+  v5   sill             debt=0.00
+  v6   mesa             debt=0.00
+  v7   brass            debt=0.00
+
+drift=17.31  diss=0.525  personal=0.000  debt=0.000  prophecy_acc=0.495  bpe=2048  words=1984  ext_vocab=2780  params=19619280  layers=8  trained=1
+
+```
+

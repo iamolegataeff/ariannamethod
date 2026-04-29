@@ -1,0 +1,100 @@
+name: cascade2 — klaus
+
+on:
+  schedule:
+    - cron: '45 0 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: cascade2-klaus
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  klaus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Guard PAT_TOKEN
+        run: |
+          if [ -z "${{ secrets.PAT_TOKEN }}" ]; then
+            echo "::error::PAT_TOKEN missing"
+            exit 1
+          fi
+
+      - name: Checkout infra
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Compute date
+        id: d
+        run: echo "today=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+
+      - name: Fetch upstream (penelope output, fallback chain)
+        id: upstream
+        run: |
+          TODAY="${{ steps.d.outputs.today }}"
+          PEN="cascade/cascade2/penelope-lab/$TODAY/output.txt"
+          HAIKU="cascade/cascade2/haiku-lab/$TODAY/output.txt"
+          if [ -f "$PEN" ]; then
+            SEED="$(cat "$PEN")"
+          elif [ -f "$HAIKU" ]; then
+            SEED="$(cat "$HAIKU")"
+          elif [ -f "cascade/cascade2/seed/today.txt" ]; then
+            SEED="$(cat cascade/cascade2/seed/today.txt)"
+          elif [ -f "cascade/cascade2/genesis.txt" ]; then
+            SEED="$(cat cascade/cascade2/genesis.txt)"
+          else
+            SEED="pressure came first, pressure made motion"
+          fi
+          {
+            echo "seed<<EOF"
+            echo "$SEED"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Clone & build klaus
+        run: |
+          git clone --depth=1 https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/iamolegataeff/klaus.c.git /tmp/klaus
+          cd /tmp/klaus
+          make
+
+      - name: Run klaus (somatic response to upstream)
+        run: |
+          cd /tmp/klaus
+          # Pass only the first 400 chars as prompt (klaus is somatic, not essay-level)
+          PROMPT=$(printf "%s" "${{ steps.upstream.outputs.seed }}" | head -c 400)
+          ./klaus --prompt "$PROMPT" > /tmp/klaus_raw.txt 2>&1 || true
+          echo "--- klaus output (last 40 lines) ---"
+          tail -40 /tmp/klaus_raw.txt
+
+      - name: Commit output to klaus-lab
+        run: |
+          DAY_DIR="cascade/cascade2/klaus-lab/${{ steps.d.outputs.today }}"
+          mkdir -p "$DAY_DIR"
+          cp /tmp/klaus_raw.txt "$DAY_DIR/output.txt"
+          printf "%s\n" "${{ steps.upstream.outputs.seed }}" > "$DAY_DIR/seed.txt"
+          git config user.email "cascade@ariannamethod.ai"
+          git config user.name  "cascade-bot"
+          git add "$DAY_DIR"
+          if git diff --cached --quiet; then
+            echo "no changes"; exit 0
+          fi
+          git commit -m "cascade2/klaus: ${{ steps.d.outputs.today }}"
+          git pull --rebase origin main || true
+          git push
+
+      - name: Alert on failure
+        if: failure() || cancelled()
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          gh issue create \
+            --repo ariannamethod/ariannamethod \
+            --title "cascade-alert: klaus ${{ steps.d.outputs.today }}" \
+            --label "cascade-alert" \
+            --body "Klaus step of cascade2 failed. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

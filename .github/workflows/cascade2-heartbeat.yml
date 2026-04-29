@@ -1,0 +1,75 @@
+name: cascade2 — heartbeat
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'   # every 6 hours
+  workflow_dispatch:
+
+concurrency:
+  group: cascade2-heartbeat
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Guard PAT_TOKEN
+        run: |
+          if [ -z "${{ secrets.PAT_TOKEN }}" ]; then
+            echo "::error::PAT_TOKEN missing"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Compute timestamps
+        id: t
+        run: |
+          echo "now=$(date -u +'%Y-%m-%d %H:%M UTC')" >> $GITHUB_OUTPUT
+          echo "today=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+
+      - name: Update heartbeat + check recent activity
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          echo "${{ steps.t.outputs.now }}" > cascade/cascade2/heartbeat.txt
+
+          # Any organism output in last 2 days?
+          RECENT=$(find cascade/cascade2 \
+                    -type f -name output.txt -mtime -2 2>/dev/null | head -1 || true)
+          if [ -z "$RECENT" ]; then
+            # Don't spam — only alert once per 24h
+            LAST_ALERT=$(ls -t cascade/cascade2/.last_alert 2>/dev/null || true)
+            NOW_EPOCH=$(date -u +%s)
+            if [ -f "cascade/cascade2/.last_alert" ]; then
+              LAST_EPOCH=$(cat cascade/cascade2/.last_alert)
+              AGE=$((NOW_EPOCH - LAST_EPOCH))
+            else
+              AGE=999999
+            fi
+            if [ "$AGE" -gt 86400 ]; then
+              gh issue create \
+                --repo ariannamethod/ariannamethod \
+                --title "cascade-alert: no activity for 48h (${{ steps.t.outputs.today }})" \
+                --label "cascade-alert" \
+                --body "Heartbeat watch: no output files modified in last 48h. Something stalled." || true
+              echo "$NOW_EPOCH" > cascade/cascade2/.last_alert
+            fi
+          fi
+
+          git config user.email "cascade@ariannamethod.ai"
+          git config user.name  "cascade-bot"
+          git add cascade/cascade2/heartbeat.txt cascade/cascade2/.last_alert 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "no changes"; exit 0
+          fi
+          git commit -m "cascade2: heartbeat ${{ steps.t.outputs.now }}"
+          git pull --rebase origin main || true
+          git push

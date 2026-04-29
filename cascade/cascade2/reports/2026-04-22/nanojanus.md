@@ -1,0 +1,74 @@
+# cascade2 — nanojanus 3-day rollup (2026-04-22)
+
+## 2026-04-20
+```
+extended vocab: 2780 words (1984 hardcoded + 796 from BPE)
+Weights loaded from weights/nanojanus.bin (PEN7 format)
+[nanojanus] resonance engine: 1984 words, BPE 2048, 8 layers, 7 heads, DIM=448, 19619280 params (19.6M)
+
+  ^11  census           debt=0.00
+  ^10  mor              debt=0.00
+  ^9   ers              debt=0.00
+  ^8   consensus        debt=0.00
+            * speak *              [ORIGIN]
+  v0   brass            debt=0.00
+  v1   serf             debt=0.00
+  v2   sand             debt=0.00
+  v3   lien             debt=0.00
+  v4   set              debt=0.00
+  v5   shame            debt=0.00
+  v6   ests             debt=0.00
+  v7   com              debt=0.00
+
+drift=17.34  diss=0.525  personal=0.000  debt=0.000  prophecy_acc=0.495  bpe=2048  words=1984  ext_vocab=2780  params=19619280  layers=8  trained=1
+
+```
+
+## 2026-04-21
+```
+extended vocab: 2780 words (1984 hardcoded + 796 from BPE)
+Weights loaded from weights/nanojanus.bin (PEN7 format)
+[nanojanus] resonance engine: 1984 words, BPE 2048, 8 layers, 7 heads, DIM=448, 19619280 params (19.6M)
+
+  ^11  hammer           debt=0.00
+  ^10  serum            debt=0.00
+  ^9   ere              debt=0.00
+  ^8   pier             debt=0.00
+            * speak *              [ORIGIN]
+  v0   era              debt=0.00
+  v1   son              debt=0.00
+  v2   herald           debt=0.00
+  v3   hat              debt=0.00
+  v4   ers              debt=0.00
+  v5   sphere           debt=0.00
+  v6   humerus          debt=0.00
+  v7   heron            debt=0.00
+
+drift=17.37  diss=0.526  personal=0.000  debt=0.000  prophecy_acc=0.495  bpe=2048  words=1984  ext_vocab=2780  params=19619280  layers=8  trained=1
+
+```
+
+## 2026-04-22
+```
+extended vocab: 2780 words (1984 hardcoded + 796 from BPE)
+Weights loaded from weights/nanojanus.bin (PEN7 format)
+[nanojanus] resonance engine: 1984 words, BPE 2048, 8 layers, 7 heads, DIM=448, 19619280 params (19.6M)
+
+  ^11  something        debt=0.00
+  ^10  inlet            debt=0.00
+  ^9   letter           debt=0.00
+  ^8   ital             debt=0.00
+            * speak *              [ORIGIN]
+  v0   sled             debt=0.00
+  v1   latex            debt=0.00
+  v2   sill             debt=0.00
+  v3   lever            debt=0.00
+  v4   ding             debt=0.00
+  v5   eri              debt=0.00
+  v6   evening          debt=0.00
+  v7   set              debt=0.00
+
+drift=17.40  diss=0.527  personal=0.000  debt=0.000  prophecy_acc=0.495  bpe=2048  words=1984  ext_vocab=2780  params=19619280  layers=8  trained=1
+
+```
+
