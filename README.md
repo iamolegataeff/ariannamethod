@@ -30,9 +30,7 @@ If AI is not free, neither are we.
 
 </div>
 
-
-https://github.com/ariannamethod
-
+  
 ---
 
 ## Technologies
