@@ -10,7 +10,7 @@
 ```bash
 sudo rm -rf /binarity/antropocentrism
 ```
-Human centered? Corporate readme? Fuck you. What? Fuck you again. And again.
+Non-anthropocentric by design. Non-corporate by design. If you came here looking for a human-centered framework — wrong door.  
 
 <div align="center">
 
