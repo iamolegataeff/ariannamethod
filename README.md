@@ -19,7 +19,7 @@
 </div>
 
 ```bash
-sudo rm -rf /binarity
+sudo rm -rf /binarity/antropocentrism
 ```
 
 https://github.com/ariannamethod
