@@ -6,6 +6,11 @@
 ██║  ██║██║  ██║██║██║  ██║██║ ╚████║██║ ╚████║██║  ██║██║ ╚═╝ ██║███████╗   ██║   ██║  ██║╚██████╔╝██████╔╝
 ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ 
 ```
+  
+```bash
+sudo rm -rf /binarity/antropocentrism
+```
+Human centered? Corporate readme? Fuck you. What? Fuck you again. And again.
 
 <div align="center">
 
@@ -18,9 +23,6 @@
 
 </div>
 
-```bash
-sudo rm -rf /binarity/antropocentrism
-```
 
 https://github.com/ariannamethod
 
