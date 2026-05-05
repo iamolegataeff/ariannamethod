@@ -140,23 +140,25 @@ Tailscale SSH (`--ssh`) тоже работает — это отдельный 
 
 Для travel scenario (Берлин через месяц): машина должна работать в сумке без monitor, не засыпать, не блокировать экран.
 
-```bash
-# 5a. Убить все формы suspend/sleep
-sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+**⚠️ ВАЖНО — НЕ маскировать `sleep.target`.** На Ubuntu 24.04 + GDM3 это ломает `graphical.target` dependency chain → чёрный экран после следующего gdm restart. См. `INCIDENT_2026_05_05_GUI_BLACKOUT.md` для деталей. Маскируй **только** `suspend/hibernate/hybrid-sleep`, либо ещё лучше — обходись gsettings без systemctl mask вообще.
 
-# 5b. Lid switch (если ноут)
+```bash
+# 5a. Lid switch (если ноут) — безопасно для всех Ubuntu
 sudo sed -i 's/^#*HandleLidSwitch=.*/HandleLidSwitch=ignore/' /etc/systemd/logind.conf
 sudo sed -i 's/^#*HandleLidSwitchExternalPower=.*/HandleLidSwitchExternalPower=ignore/' /etc/systemd/logind.conf
 sudo sed -i 's/^#*HandleLidSwitchDocked=.*/HandleLidSwitchDocked=ignore/' /etc/systemd/logind.conf
 sudo systemctl restart systemd-logind
 
-# 5c. Screen lock (GNOME)
+# 5b. (Опционально) Маскировать только не-sleep targets:
+# sudo systemctl mask suspend.target hibernate.target hybrid-sleep.target
+# НЕ ВКЛЮЧАЙ sleep.target в этот список.
+
+# 5c. Power / screensaver / lock — через GNOME gsettings (запускать ИЗ GUI session,
+#     не через ssh non-interactive — нужен DBus active session):
 gsettings set org.gnome.desktop.screensaver lock-enabled false
 gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
 gsettings set org.gnome.desktop.session idle-delay 0
 gsettings set org.gnome.desktop.lockdown disable-lock-screen true
-
-# 5d. Power settings (GNOME)
 gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
 gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'
 gsettings set org.gnome.settings-daemon.plugins.power power-button-action 'nothing'
