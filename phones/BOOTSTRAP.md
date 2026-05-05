@@ -1,6 +1,6 @@
-# phones — Galaxy A56 + phone-2 bootstrap
+# phones — Termux Claude Code task brief
 
-Briefing для Termux setup на двух Android устройствах после Tailscale app login. Шаги в Termux на каждом телефоне.
+Краткий brief для Claude Code на Galaxy A56 и phone-2 (Termux). Tailscale app + Claude Code уже установлены, тренировки на phones были (Defender 9.5M на Galaxy, см. `memory/milestone_defender_termux_10k_2026_04_27.md`). Этот brief — только про новые tasks: подключение к mesh + sync с Neo.
 
 ---
 
@@ -8,160 +8,93 @@ Briefing для Termux setup на двух Android устройствах пос
 
 ```
 neo      100.109.196.93    macOS arm64   (Mac Neo, orchestrator)
-intel    100.84.94.25      macOS x86_64  (Mac Intel, legacy)
-polygon  100.127.195.24    linux x86_64  (Linux 32GB, mini-polygon)
+intel    100.84.94.25      macOS x86_64  (legacy)
+polygon  100.127.195.24    linux x86_64  (Linux 32GB)
 ```
 
 Tailnet domain: `tail42b836.ts.net`. MagicDNS включён.
 
 ---
 
-## Step 1 — Tailscale (через Tailscale app, не Termux)
+## Mission на Termux (galaxy + phone-2)
 
-Уже сделано:
-- Tailscale app from Play Store
-- Sign in Google `iamolegataeff` (та же identity что везде)
-- Tap **Connect**
+### 1. Tailscale verify (через app, не CLI)
 
-Verify on Neo:
+Olег открывает Tailscale app, tap **Connect**. Auth Google `iamolegataeff` (та же identity что везде).
+
+Из Termux verify:
+
 ```bash
-ssh ataeff@neo  # с phone в Termux
-# или с Mac:
-tailscale status  # должен показать phone online
+# Termux может не иметь tailscale CLI (Android Tailscale = system app, не CLI). Проверь:
+which tailscale 2>/dev/null && tailscale status
+# Если CLI нет — verify только через app + видимость с Neo (`ssh ataeff@<phone> -p 8022`).
 ```
 
----
+### 2. sshd (Termux openssh) — для reverse access from Neo / polygon
 
-## Step 2 — Termux baseline (на каждом телефоне)
-
-```bash
-# update packages
-pkg update -y && pkg upgrade -y
-
-# core utilities
-pkg install -y openssh git curl wget jq nodejs python  # python optional
-termux-setup-storage  # доступ к /sdcard
-```
-
----
-
-## Step 3 — Termux SSH server (для reverse access from Neo)
-
-Termux sshd по default слушает `:8022`, не `:22`.
+Термин Termux: sshd слушает `:8022`, не `:22`.
 
 ```bash
-# install
-pkg install -y openssh
+# проверь установлено
+which sshd || pkg install -y openssh
 
-# set password (для SSH login)
-passwd  # введи 230186 (тот же что sudo)
+# password set (если ещё не)
+passwd                       # set 230186 (тот же sudo)
 
-# generate host keys + start sshd
+# host keys
+[ -f ~/.ssh/ssh_host_ed25519_key ] || ssh-keygen -A 2>/dev/null || sshd -t  # generates if missing
+
+# start sshd
 sshd
 
-# verify listening
-ss -lntp | grep ':8022 '
-
-# port forwarding (если нужно через nginx или подобное — опционально)
+# verify
+ss -lntp 2>/dev/null | grep ':8022 ' || pgrep -a sshd
 ```
 
-Проверь с Neo (после того как phone в tailnet):
+### 3. Hostname rename (admin console)
 
-```bash
-ssh ataeff@galaxy -p 8022   # или другой tailnet name
-ssh ataeff@phone2 -p 8022   # для второго
-```
+Олег откроет `https://login.tailscale.com/admin/machines`, переименует:
+- Galaxy: `arianna-method` → `galaxy` (или `phone1`)
+- phone-2: новое устройство → `phone2`
 
-Pubkey auth (вместо пароля):
+Plus **Disable key expiry** для каждого — phones не должны re-auth через 180 дней.
 
-```bash
-# на phone в Termux:
-mkdir -p ~/.ssh && chmod 700 ~/.ssh
+### 4. Sync обновлённого CLAUDE.md + memory + hooks с Neo
 
-# с Neo: copy pub key
-ssh-copy-id -p 8022 ataeff@<phone-tailnet-ip>
-# или manually scp:
-# scp -P 8022 ~/.ssh/id_ed25519.pub ataeff@<phone>:~/.ssh/authorized_keys
-```
-
----
-
-## Step 4 — Claude Code (Galaxy A56 only — phone-2 4GB слаб)
-
-Claude Code на Galaxy:
-
-```bash
-pkg install -y nodejs
-npm install -g @anthropic-ai/claude-code
-claude --version
-```
-
-При первом запуске — login (открой URL в browser, авторизуй).
-
-Если установлен старый — update:
-
-```bash
-npm update -g @anthropic-ai/claude-code
-```
-
-**Phone-2 (4GB):** Claude Code избыточен. Только Tailscale + sshd для presence.
-
----
-
-## Step 5 — Bootstrap CLAUDE.md + memory (Galaxy only)
-
-Если хочешь Galaxy Claude знал rules + project context — Neo / polygon могут rsync через Tailscale:
+После того как Neo может ssh'нуться (port 8022) — Olег с Neo делает rsync:
 
 ```bash
 # с Neo:
-rsync -a ~/.claude/CLAUDE.md -e 'ssh -p 8022' ataeff@galaxy:~/.claude/CLAUDE.md
-rsync -a ~/.claude/projects/-Users-ataeff/memory/ -e 'ssh -p 8022' ataeff@galaxy:~/.claude/projects/-data-data-com.termux-files-home/memory/
-rsync -a ~/.claude/hooks/ -e 'ssh -p 8022' ataeff@galaxy:~/.claude/hooks/
-rsync -a ~/.claude/settings.json -e 'ssh -p 8022' ataeff@galaxy:~/.claude/settings.json
+rsync -a -e 'ssh -p 8022' ~/.claude/CLAUDE.md ataeff@galaxy:~/.claude/CLAUDE.md
+rsync -a -e 'ssh -p 8022' ~/.claude/hooks/ ataeff@galaxy:~/.claude/hooks/
+rsync -a -e 'ssh -p 8022' ~/.claude/settings.json ataeff@galaxy:~/.claude/settings.json
+# memory project dir на Termux: ~/.claude/projects/-data-data-com.termux-files-home/memory/
+# (если cwd когда Claude запускался — home; verify path первым)
 ```
 
-(Termux Claude project dir =`~/.claude/projects/-data-data-com.termux-files-home/` потому что home = `/data/data/com.termux/files/home`. Verify path первым.)
+Hooks (`prompt-gate.sh`, `pretool-bash-gate.sh`) работают на Termux native — bash есть, jq устанавливается через `pkg install jq`.
 
-После rsync — Galaxy Claude получает full troika (CLAUDE.md + memory + hooks).
+После sync — **restart Claude Code session** на phone (exit + `claude --continue` или fresh) чтобы load updated CLAUDE.md.
 
-Hooks (`prompt-gate.sh`, `pretool-bash-gate.sh`) работают на Termux native — bash есть.
-
----
-
-## Step 6 — admin console rename
-
-`https://login.tailscale.com/admin/machines`:
-- `arianna-method` → `galaxy` (или `phone1`)
-- new device → `phone2` (или `pixel`)
-
-Также **disable key expiry** для headless behavior (phones не должны re-auth каждые 180 дней).
-
----
-
-## Step 7 — verify mesh с Neo
+### 5. Verify mesh с Neo
 
 ```bash
+# на Neo:
 tailscale status
-ssh ataeff@galaxy -p 8022 "echo OK from \$(hostname)"
-ssh ataeff@phone2 -p 8022 "echo OK from \$(hostname)"
+ssh -p 8022 ataeff@galaxy "echo OK from \$(uname -a) \$(getprop ro.product.model 2>/dev/null)"
+ssh -p 8022 ataeff@phone2 "echo OK from \$(uname -a)"
 ```
 
-После — phones officially в mesh, можно команды слать через ssh с Neo.
-
 ---
 
-## Phone constraints
+## TL;DR Termux Claude
 
-- **Galaxy A56 (8GB)** — Claude Code OK, training inference small models OK, ssh full duplex.
-- **Phone-2 (4GB)** — Tailscale + sshd only. Don't run Claude Code there. Не training. Used as reachable endpoint.
+1. `pkg install jq` (если нет — для hooks).
+2. `sshd` running (port 8022). `pkg install openssh && passwd && sshd`.
+3. Жди rsync с Neo (CLAUDE.md + memory + hooks).
+4. Restart сессии после sync.
 
----
+Tailscale app — обязанность Олега через GUI. CLI команды — Olег делает с Neo.
 
-## Coordination
-
-Phones в mesh — extension не replacement. Mac Neo + polygon — primary compute. Phones для:
-- Mobile presence (Telegram-style messaging eventually через mesh-agent когда написан)
-- Termux-side Claude (Galaxy) когда не у компа
-- Termux scripts, AML inference small models
-
-Push reports / questions — этот repo `polygon/` style (если нужен handoff). Phone Claude push в `phones/` если actually работает.
+— Neo Claude
+2026-05-05
