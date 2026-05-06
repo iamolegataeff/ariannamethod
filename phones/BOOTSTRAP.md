@@ -1,100 +1,134 @@
-# phones — Termux Claude Code task brief
+# phones — Termux task brief (EN)
 
-Краткий brief для Claude Code на Galaxy A56 и phone-2 (Termux). Tailscale app + Claude Code уже установлены, тренировки на phones были (Defender 9.5M на Galaxy, см. `memory/milestone_defender_termux_10k_2026_04_27.md`). Этот brief — только про новые tasks: подключение к mesh + sync с Neo.
-
----
-
-## Mesh state (на момент написания)
-
-```
-neo      100.109.196.93    macOS arm64   (Mac Neo, orchestrator)
-intel    100.84.94.25      macOS x86_64  (legacy)
-polygon  100.127.195.24    linux x86_64  (Linux 32GB)
-```
-
-Tailnet domain: `tail42b836.ts.net`. MagicDNS включён.
+Brief for Claude Code running in Termux on Android (Galaxy A56 `arianna-method` and the upcoming `phone-2`). Tailscale app + Claude Code already installed on each device — this brief is only for the new mesh-integration tasks.
 
 ---
 
-## Mission на Termux (galaxy + phone-2)
+## Mesh state
 
-### 1. Tailscale verify (через app, не CLI)
-
-Olег открывает Tailscale app, tap **Connect**. Auth Google `iamolegataeff` (та же identity что везде).
-
-Из Termux verify:
-
-```bash
-# Termux может не иметь tailscale CLI (Android Tailscale = system app, не CLI). Проверь:
-which tailscale 2>/dev/null && tailscale status
-# Если CLI нет — verify только через app + видимость с Neo (`ssh ataeff@<phone> -p 8022`).
+```
+neo             100.109.196.93   macOS arm64   (Mac Neo, orchestrator)
+intel           100.84.94.25     macOS x86_64  (legacy)
+polygon         100.127.195.24   linux x86_64  (Linux 32GB compute hub)
+arianna-method  100.105.172.21   android       (Galaxy A56, this device)
 ```
 
-### 2. sshd (Termux openssh) — для reverse access from Neo / polygon
+Tailnet domain: `tail42b836.ts.net`. MagicDNS enabled. SSH ACL action `accept` (no periodic re-auth check).
 
-Термин Termux: sshd слушает `:8022`, не `:22`.
+Sudo / login password (whenever needed): `230186`.
+
+---
+
+## Mission
+
+Bring Termux on this device into the mesh as a first-class node:
+
+### 1. Tailscale verification
+
+Tailscale on Android is a system app, not a CLI. Verify by checking incoming connectivity from Neo (Oleg will do that side).
+
+If `tailscale` CLI happens to be present in Termux:
 
 ```bash
-# проверь установлено
+which tailscale && tailscale status
+```
+
+Otherwise skip — the system-app Tailscale is what matters.
+
+### 2. Termux openssh-server (port 8022)
+
+Termux sshd listens on **port 8022** by default, not 22.
+
+```bash
+# install if missing
 which sshd || pkg install -y openssh
 
-# password set (если ещё не)
-passwd                       # set 230186 (тот же sudo)
+# set login password for ssh
+passwd                       # use 230186 (same as Oleg's sudo)
 
-# host keys
-[ -f ~/.ssh/ssh_host_ed25519_key ] || ssh-keygen -A 2>/dev/null || sshd -t  # generates if missing
+# generate host keys (idempotent)
+sshd                         # first invocation also generates keys
 
-# start sshd
-sshd
-
-# verify
+# verify listening
 ss -lntp 2>/dev/null | grep ':8022 ' || pgrep -a sshd
 ```
 
-### 3. Hostname rename (admin console)
-
-Олег откроет `https://login.tailscale.com/admin/machines`, переименует:
-- Galaxy: `arianna-method` → `galaxy` (или `phone1`)
-- phone-2: новое устройство → `phone2`
-
-Plus **Disable key expiry** для каждого — phones не должны re-auth через 180 дней.
-
-### 4. Sync обновлённого CLAUDE.md + memory + hooks с Neo
-
-После того как Neo может ssh'нуться (port 8022) — Olег с Neo делает rsync:
+### 3. Claude Code update (already installed; refresh)
 
 ```bash
-# с Neo:
-rsync -a -e 'ssh -p 8022' ~/.claude/CLAUDE.md ataeff@galaxy:~/.claude/CLAUDE.md
-rsync -a -e 'ssh -p 8022' ~/.claude/hooks/ ataeff@galaxy:~/.claude/hooks/
-rsync -a -e 'ssh -p 8022' ~/.claude/settings.json ataeff@galaxy:~/.claude/settings.json
-# memory project dir на Termux: ~/.claude/projects/-data-data-com.termux-files-home/memory/
-# (если cwd когда Claude запускался — home; verify path первым)
+# bun-installed claude (most likely path)
+ls ~/.bun/bin/claude 2>/dev/null && bun pm ls -g | grep claude
+# OR npm-installed
+which claude && claude --version
+
+# update via the same package manager that originally installed it
+# bun:    bun install -g @anthropic-ai/claude-code
+# npm:    npm install -g @anthropic-ai/claude-code
 ```
 
-Hooks (`prompt-gate.sh`, `pretool-bash-gate.sh`) работают на Termux native — bash есть, jq устанавливается через `pkg install jq`.
+Aim for the latest stable. Show Oleg the new `claude --version`.
 
-После sync — **restart Claude Code session** на phone (exit + `claude --continue` или fresh) чтобы load updated CLAUDE.md.
-
-### 5. Verify mesh с Neo
+### 4. Make sure jq is available (hooks need it)
 
 ```bash
-# на Neo:
-tailscale status
-ssh -p 8022 ataeff@galaxy "echo OK from \$(uname -a) \$(getprop ro.product.model 2>/dev/null)"
-ssh -p 8022 ataeff@phone2 "echo OK from \$(uname -a)"
+which jq || pkg install -y jq
 ```
+
+### 5. Wait for rsync from Neo
+
+Once sshd is up on port 8022, Neo will push the troika via Tailscale:
+
+- `~/.claude/CLAUDE.md` — global Claude rules (AML/notorch/mhx promotion, GATE, bans)
+- `~/.claude/projects/<project-dir>/memory/` — full memory snapshot (~355 files: feedbacks, milestones, project state, insights)
+- `~/.claude/hooks/` — `prompt-gate.sh` + `pretool-bash-gate.sh` + `state/` dir
+- `~/.claude/settings.json` — hooks wiring + permissions
+
+Termux project dir is typically `~/.claude/projects/-data-data-com.termux-files-home/` (since Termux home = `/data/data/com.termux/files/home`). Verify the actual path with `ls ~/.claude/projects/`.
+
+### 6. Restart Claude Code session
+
+After rsync completes, exit the current Claude Code session and either:
+
+```bash
+claude --continue       # resume last session in this cwd, picks up new CLAUDE.md
+# or
+claude                  # fresh session
+```
+
+This ensures the new CLAUDE.md with READ-FIRST GATE and updated `Languages` (AML/notorch/mhx as first-class) is loaded.
+
+### 7. Hostname rename (admin console — Oleg's job)
+
+Oleg will rename the device in `https://login.tailscale.com/admin/machines`:
+
+- `arianna-method` → `galaxy` (or `phone1`)
+- and **disable key expiry** so the device stays in the mesh without periodic re-auth.
+
+### 8. Verify mesh from Neo
+
+Oleg will run from Neo:
+
+```bash
+ssh -p 8022 ataeff@galaxy "echo OK from $(uname -a)"
+```
+
+When that returns clean, the device is fully integrated.
 
 ---
 
-## TL;DR Termux Claude
+## TL;DR
 
-1. `pkg install jq` (если нет — для hooks).
-2. `sshd` running (port 8022). `pkg install openssh && passwd && sshd`.
-3. Жди rsync с Neo (CLAUDE.md + memory + hooks).
-4. Restart сессии после sync.
+1. `pkg install -y openssh jq`
+2. `passwd` (set 230186), `sshd` (start)
+3. Update Claude Code via your package manager
+4. Wait for rsync from Neo
+5. Restart Claude Code session
+6. Confirm to Oleg
 
-Tailscale app — обязанность Олега через GUI. CLI команды — Olег делает с Neo.
+Do NOT:
+- run training without Oleg's 6-point brief (see `memory/feedback_failure_unsolicited_finetune_2026_04_27.md` after rsync)
+- touch closed milestone weights (sonar_*, microjanus_*, penelope, nanojanus, arianna_36m, pitomadom, lee_v8, DoE.coder)
+- write into Neo's memory paths — your local memory is independent
 
 — Neo Claude
-2026-05-05
+2026-05-06
