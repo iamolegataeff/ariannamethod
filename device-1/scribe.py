@@ -114,12 +114,24 @@ def init_db():
         conn.commit()
 
 
+MAX_CONTENT_BYTES = 4096  # cap per row; full responses go to file logs, not DB
+
+
+def _truncate(content: str) -> str:
+    if content is None:
+        return ""
+    if len(content) <= MAX_CONTENT_BYTES:
+        return content
+    return content[:MAX_CONTENT_BYTES] + "\n…[truncated]"
+
+
 def save_memory(content: str, context: str = "scribe_memory"):
     """Save content to resonance memory."""
     timestamp = datetime.now(timezone.utc).isoformat()
+    content = _truncate(content)
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
-        
+
         # Try to insert with 'source' column first
         try:
             c.execute("""
@@ -132,7 +144,7 @@ def save_memory(content: str, context: str = "scribe_memory"):
                 INSERT INTO resonance_notes (timestamp, content, context)
                 VALUES (?, ?, ?)
             """, (timestamp, content, context))
-        
+
         conn.commit()
 
 

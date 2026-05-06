@@ -45,9 +45,23 @@ except ImportError:
 # Initialize Anthropic client
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
+MAX_CONTENT_BYTES = 4096  # cap per row; full responses go to file logs, not DB
+
+
+def _truncate(content):
+    if content is None:
+        return ""
+    if isinstance(content, bytes):
+        content = content.decode("utf-8", errors="replace")
+    if len(content) <= MAX_CONTENT_BYTES:
+        return content
+    return content[:MAX_CONTENT_BYTES] + "\n…[truncated]"
+
+
 def log_to_resonance(source, content, context="scribe_conversation"):
     """Log message to resonance.sqlite3"""
     try:
+        content = _truncate(content)
         print(f"[DEBUG] Logging to resonance: DB={DB_PATH}, source={source}")
         conn = sqlite3.connect(str(DB_PATH), timeout=10)
         cursor = conn.cursor()
