@@ -1,0 +1,233 @@
+[ecology] Element: water → corpus: nonames_water.txt
+[evolution] Autonomous evolution mode — organism will grow through all stages without pause.
+[ecology] Joined swarm. 1 peer(s) detected.
+molequla is alive. [evolution] Autonomous mode — background trainer running. Ctrl+C to stop.
+[dna] water wrote 156 bytes to ecology
+[dna] water consumed 16303 bytes from 222 files: [air/gen_1774761884_1.txt air/gen_1774761900_4.txt air/gen_1774761908_7.txt air/gen_1774761916_10.txt air/gen_1774761925_13.txt air/gen_1774761933_16.txt air/gen_1774761941_19.txt air/gen_1774761949_22.txt air/gen_1774761957_25.txt air/gen_1774761966_28.txt air/gen_1774761974_31.txt air/gen_1774761982_34.txt air/gen_1774761990_37.txt air/gen_1774761999_40.txt air/gen_1774762007_43.txt air/gen_1774762015_46.txt air/gen_1774762023_49.txt air/gen_1774762032_52.txt air/gen_1774762040_55.txt air/gen_1774762048_58.txt air/gen_1774762056_61.txt air/gen_1774762064_64.txt air/gen_1774762073_67.txt air/gen_1774762081_70.txt air/gen_1774762089_73.txt air/gen_1774762097_76.txt air/gen_1774762105_79.txt air/gen_1774762113_82.txt air/gen_1774762121_85.txt air/gen_1774762130_88.txt air/gen_1774762138_91.txt air/gen_1774762146_94.txt air/gen_1774762154_97.txt air/gen_1774762162_100.txt air/gen_1774762171_103.txt air/gen_1774762179_106.txt air/gen_1774762187_109.txt air/gen_1774762195_112.txt air/gen_1774762203_115.txt air/gen_1774762211_118.txt air/gen_1774762219_121.txt air/gen_1774762227_124.txt air/gen_1774762235_127.txt air/gen_1774762243_130.txt air/gen_1774762251_133.txt air/gen_1774762260_136.txt air/gen_1774762268_139.txt air/gen_1774762276_142.txt air/gen_1774762284_145.txt air/gen_1774762292_148.txt air/gen_1774762300_151.txt air/gen_1774762308_154.txt air/gen_1774762316_157.txt air/gen_1774762324_160.txt air/gen_1774762332_163.txt air/gen_1774762341_166.txt air/gen_1774762349_169.txt air/gen_1774762357_172.txt air/gen_1774762366_175.txt air/gen_1774762374_178.txt air/gen_1774762382_181.txt air/gen_1774762391_184.txt air/gen_1774762399_187.txt air/gen_1774762407_190.txt air/gen_1774762416_193.txt air/gen_1774762424_196.txt air/gen_1774762432_199.txt air/gen_1774762440_202.txt air/gen_1774762448_205.txt air/gen_1774762456_208.txt air/gen_1774762465_211.txt air/gen_1774762473_214.txt air/gen_1774762481_217.txt air/gen_1774762489_220.txt air/gen_1774762497_223.txt air/gen_1774762505_226.txt air/gen_1774762513_229.txt air/gen_1774762521_232.txt air/gen_1774762529_235.txt air/gen_1774762537_238.txt air/gen_1774762545_241.txt air/gen_1774762553_244.txt air/gen_1774762561_247.txt air/gen_1774762569_250.txt air/gen_1774762577_253.txt air/gen_1774762585_256.txt air/gen_1774762593_259.txt air/gen_1774762602_262.txt air/gen_1774762610_265.txt air/gen_1774762618_268.txt air/gen_1774762626_271.txt air/gen_1774762634_274.txt air/gen_1774762642_277.txt air/gen_1774762650_280.txt air/gen_1774762658_283.txt air/gen_1774762666_286.txt air/gen_1774762674_289.txt air/gen_1774762682_292.txt air/gen_1774762690_295.txt air/gen_1774762698_298.txt air/gen_1774762706_301.txt air/gen_1774762714_304.txt air/gen_1774762722_307.txt air/gen_1774762731_310.txt air/gen_1774762739_313.txt air/gen_1774762747_316.txt air/gen_1774762755_319.txt air/gen_1774762763_322.txt air/gen_1774762771_325.txt air/gen_1774762779_328.txt air/gen_1774762787_331.txt air/gen_1774762795_334.txt air/gen_1774762803_337.txt air/gen_1774762811_340.txt air/gen_1774762819_343.txt air/gen_1774762827_346.txt air/gen_1774762835_349.txt air/gen_1774762843_352.txt air/gen_1774762851_355.txt air/gen_1774762859_358.txt air/gen_1774762867_361.txt air/gen_1774762875_364.txt air/gen_1774762883_367.txt air/gen_1774762891_370.txt air/gen_1774762899_373.txt air/gen_1774762907_376.txt air/gen_1774762915_379.txt air/gen_1774762923_382.txt air/gen_1774762932_385.txt air/gen_1774762940_388.txt air/gen_1774762948_391.txt air/gen_1774762956_394.txt air/gen_1774762964_397.txt air/gen_1774762972_400.txt air/gen_1774762980_403.txt air/gen_1774762988_406.txt air/gen_1774762996_409.txt air/gen_1774763004_412.txt air/gen_1774763012_415.txt air/gen_1774763020_418.txt air/gen_1774763028_421.txt air/gen_1774763036_424.txt air/gen_1774763044_427.txt air/gen_1774763053_430.txt air/gen_1774763061_433.txt air/gen_1774763069_436.txt air/gen_1774763077_439.txt air/gen_1774763085_442.txt air/gen_1774763093_445.txt air/gen_1774763101_448.txt air/gen_1774763109_451.txt air/gen_1774763117_454.txt air/gen_1774763125_457.txt air/gen_1774763133_460.txt air/gen_1774763141_463.txt air/gen_1774763149_466.txt air/gen_1774763157_469.txt air/gen_1774763165_472.txt air/gen_1774763173_475.txt air/gen_1774763181_478.txt air/gen_1774763189_481.txt air/gen_1774763197_484.txt air/gen_1774763206_487.txt air/gen_1774763214_490.txt air/gen_1774763221_493.txt air/gen_1774763229_496.txt air/gen_1774763237_499.txt air/gen_1774763246_502.txt air/gen_1774763254_505.txt air/gen_1774763262_508.txt air/gen_1774763270_511.txt air/gen_1774763278_514.txt air/gen_1774763286_517.txt air/gen_1774763294_520.txt air/gen_1774763302_523.txt air/gen_1774763309_526.txt air/gen_1774763317_529.txt air/gen_1774763325_532.txt air/gen_1774763333_535.txt air/gen_1774763341_538.txt air/gen_1774763349_541.txt air/gen_1774763357_544.txt air/gen_1774763365_547.txt air/gen_1774763373_550.txt air/gen_1774763381_553.txt air/gen_1774763389_556.txt air/gen_1774763398_559.txt air/gen_1774763406_562.txt air/gen_1774763414_565.txt air/gen_1774763422_568.txt air/gen_1774763430_571.txt air/gen_1774763438_574.txt air/gen_1774763446_577.txt air/gen_1774763454_580.txt air/gen_1774763462_583.txt air/gen_1774763470_586.txt air/gen_1774763478_589.txt air/gen_1774763486_592.txt air/gen_1774763494_595.txt air/gen_1774763502_598.txt air/gen_1774763510_601.txt air/gen_1774763518_604.txt air/gen_1774763526_607.txt air/gen_1774763535_610.txt air/gen_1774763543_613.txt air/gen_1774763551_616.txt air/gen_1774763559_619.txt air/gen_1774763567_622.txt air/gen_1774763575_625.txt air/gen_1774763583_628.txt air/gen_1774763591_631.txt air/gen_1774763599_634.txt air/gen_1774763607_637.txt air/gen_1774763615_640.txt air/gen_1774763623_643.txt air/gen_1774763631_646.txt air/gen_1774763640_649.txt air/gen_1774763648_652.txt air/gen_1774763656_655.txt air/gen_1774763664_658.txt air/gen_1774763672_661.txt air/gen_1774763680_664.txt]
+[trainer] micro-train burst (16303 bytes, novelty 0.03) — and lo, it feeds again.
+[syntropy] action=explore | trend=0.0000 | field_dev=-0.057 | purpose_align=-0.042 | lr_mul=1.30
+[aml] burst complete: 32 steps, avg loss 1.4528 (memory freed)
+[dna] water wrote 73 bytes to ecology
+[dna] water wrote 49 bytes to ecology
+[dna] water wrote 74 bytes to ecology
+[dna] water wrote 119 bytes to ecology
+[dna] water wrote 49 bytes to ecology
+[dna] water wrote 61 bytes to ecology
+[dna] water wrote 95 bytes to ecology
+[dna] water wrote 125 bytes to ecology
+[dna] water wrote 17 bytes to ecology
+[dna] water wrote 72 bytes to ecology
+[dna] water wrote 105 bytes to ecology
+[dna] water wrote 63 bytes to ecology
+[dna] water wrote 204 bytes to ecology
+[dna] water wrote 52 bytes to ecology
+[dna] water wrote 30 bytes to ecology
+[dna] water wrote 137 bytes to ecology
+[debug-onto] tick=50 corpus=142222 stage=2 freeze=0
+[dna] water wrote 34 bytes to ecology
+[dna] water wrote 43 bytes to ecology
+[dna] water wrote 41 bytes to ecology
+[dna] water wrote 96 bytes to ecology
+[dna] water wrote 88 bytes to ecology
+[dna] water wrote 29 bytes to ecology
+[dna] water wrote 96 bytes to ecology
+[dna] water wrote 59 bytes to ecology
+[dna] water wrote 138 bytes to ecology
+[dna] water wrote 40 bytes to ecology
+[dna] water wrote 67 bytes to ecology
+[dna] water wrote 42 bytes to ecology
+[dna] water wrote 37 bytes to ecology
+[dna] water wrote 96 bytes to ecology
+[dna] water wrote 61 bytes to ecology
+[dna] water wrote 107 bytes to ecology
+[dna] water wrote 133 bytes to ecology
+[debug-onto] tick=100 corpus=142222 stage=2 freeze=0
+[dna] water wrote 35 bytes to ecology
+[dna] water wrote 49 bytes to ecology
+[dna] water wrote 37 bytes to ecology
+[dna] water wrote 33 bytes to ecology
+[dna] water wrote 75 bytes to ecology
+[dna] water wrote 153 bytes to ecology
+[dna] water wrote 58 bytes to ecology
+[dna] water wrote 56 bytes to ecology
+[dna] water wrote 60 bytes to ecology
+[dna] water wrote 63 bytes to ecology
+[dna] water wrote 23 bytes to ecology
+[dna] water wrote 40 bytes to ecology
+[dna] water wrote 60 bytes to ecology
+[dna] water wrote 94 bytes to ecology
+[dna] water wrote 97 bytes to ecology
+[dna] water wrote 113 bytes to ecology
+[debug-onto] tick=150 corpus=142222 stage=2 freeze=0
+[dna] water wrote 43 bytes to ecology
+[dna] water wrote 106 bytes to ecology
+[dna] water wrote 150 bytes to ecology
+[dna] water wrote 50 bytes to ecology
+[dna] water wrote 83 bytes to ecology
+[dna] water wrote 29 bytes to ecology
+[dna] water wrote 70 bytes to ecology
+[dna] water wrote 81 bytes to ecology
+[dna] water wrote 178 bytes to ecology
+[dna] water wrote 56 bytes to ecology
+[dna] water wrote 69 bytes to ecology
+[dna] water wrote 49 bytes to ecology
+[dna] water wrote 64 bytes to ecology
+[dna] water wrote 101 bytes to ecology
+[dna] water wrote 107 bytes to ecology
+[dna] water wrote 130 bytes to ecology
+[dna] water wrote 32 bytes to ecology
+[debug-onto] tick=200 corpus=142222 stage=2 freeze=0
+[dna] water wrote 51 bytes to ecology
+[dna] water wrote 11 bytes to ecology
+[dna] water wrote 114 bytes to ecology
+[dna] water wrote 15 bytes to ecology
+[dna] water wrote 226 bytes to ecology
+[dna] water wrote 30 bytes to ecology
+[dna] water wrote 45 bytes to ecology
+[dna] water wrote 286 bytes to ecology
+[dna] water wrote 41 bytes to ecology
+[dna] water wrote 57 bytes to ecology
+[dna] water wrote 17 bytes to ecology
+[dna] water wrote 33 bytes to ecology
+[dna] water wrote 22 bytes to ecology
+[dna] water wrote 60 bytes to ecology
+[dna] water wrote 127 bytes to ecology
+[dna] water wrote 55 bytes to ecology
+[dna] water wrote 29 bytes to ecology
+[debug-onto] tick=250 corpus=142222 stage=2 freeze=0
+[dna] water wrote 31 bytes to ecology
+[dna] water wrote 48 bytes to ecology
+[dna] water wrote 68 bytes to ecology
+[dna] water wrote 30 bytes to ecology
+[dna] water wrote 25 bytes to ecology
+[dna] water wrote 79 bytes to ecology
+[dna] water wrote 32 bytes to ecology
+[dna] water wrote 43 bytes to ecology
+[dna] water wrote 52 bytes to ecology
+[dna] water wrote 66 bytes to ecology
+[dna] water wrote 32 bytes to ecology
+[dna] water wrote 26 bytes to ecology
+[dna] water wrote 39 bytes to ecology
+[dna] water wrote 56 bytes to ecology
+[dna] water wrote 30 bytes to ecology
+[dna] water wrote 22 bytes to ecology
+[debug-onto] tick=300 corpus=142222 stage=2 freeze=0
+[dna] water wrote 113 bytes to ecology
+[dna] water wrote 29 bytes to ecology
+[dna] water wrote 104 bytes to ecology
+[dna] water wrote 110 bytes to ecology
+[dna] water wrote 103 bytes to ecology
+[dna] water wrote 35 bytes to ecology
+[dna] water wrote 116 bytes to ecology
+[dna] water wrote 46 bytes to ecology
+[dna] water wrote 56 bytes to ecology
+[dna] water wrote 42 bytes to ecology
+[dna] water wrote 84 bytes to ecology
+[dna] water wrote 99 bytes to ecology
+[dna] water wrote 45 bytes to ecology
+[dna] water wrote 38 bytes to ecology
+[dna] water wrote 82 bytes to ecology
+[dna] water wrote 73 bytes to ecology
+[dna] water wrote 12 bytes to ecology
+[debug-onto] tick=350 corpus=142222 stage=2 freeze=0
+[dna] water wrote 67 bytes to ecology
+[dna] water wrote 79 bytes to ecology
+[dna] water wrote 148 bytes to ecology
+[dna] water wrote 63 bytes to ecology
+[dna] water wrote 146 bytes to ecology
+[dna] water wrote 21 bytes to ecology
+[dna] water wrote 154 bytes to ecology
+[dna] water wrote 90 bytes to ecology
+[dna] water wrote 43 bytes to ecology
+[dna] water wrote 65 bytes to ecology
+[dna] water wrote 101 bytes to ecology
+[dna] water wrote 87 bytes to ecology
+[dna] water wrote 94 bytes to ecology
+[dna] water wrote 157 bytes to ecology
+[dna] water wrote 71 bytes to ecology
+[dna] water wrote 61 bytes to ecology
+[dna] water wrote 14 bytes to ecology
+[debug-onto] tick=400 corpus=142222 stage=2 freeze=0
+[dna] water wrote 19 bytes to ecology
+[dna] water wrote 78 bytes to ecology
+[dna] water wrote 38 bytes to ecology
+[dna] water wrote 99 bytes to ecology
+[dna] water wrote 94 bytes to ecology
+[dna] water wrote 82 bytes to ecology
+[dna] water wrote 33 bytes to ecology
+[dna] water wrote 91 bytes to ecology
+[dna] water wrote 39 bytes to ecology
+[dna] water wrote 76 bytes to ecology
+[dna] water wrote 110 bytes to ecology
+[dna] water wrote 75 bytes to ecology
+[dna] water wrote 33 bytes to ecology
+[dna] water wrote 32 bytes to ecology
+[dna] water wrote 57 bytes to ecology
+[dna] water wrote 57 bytes to ecology
+[debug-onto] tick=450 corpus=142222 stage=2 freeze=0
+[dna] water wrote 34 bytes to ecology
+[dna] water wrote 53 bytes to ecology
+[dna] water wrote 60 bytes to ecology
+[dna] water wrote 59 bytes to ecology
+[dna] water wrote 79 bytes to ecology
+[dna] water wrote 62 bytes to ecology
+[dna] water wrote 72 bytes to ecology
+[dna] water wrote 82 bytes to ecology
+[dna] water wrote 104 bytes to ecology
+[dna] water wrote 24 bytes to ecology
+[dna] water wrote 69 bytes to ecology
+[dna] water wrote 111 bytes to ecology
+[dna] water wrote 63 bytes to ecology
+[dna] water wrote 45 bytes to ecology
+[dna] water wrote 62 bytes to ecology
+[dna] water wrote 67 bytes to ecology
+[dna] water wrote 80 bytes to ecology
+[debug-onto] tick=500 corpus=142222 stage=2 freeze=0
+[dna] water wrote 33 bytes to ecology
+[dna] water wrote 36 bytes to ecology
+[dna] water wrote 71 bytes to ecology
+[dna] water wrote 47 bytes to ecology
+[dna] water wrote 34 bytes to ecology
+[dna] water wrote 34 bytes to ecology
+[dna] water wrote 34 bytes to ecology
+[dna] water wrote 77 bytes to ecology
+[dna] water wrote 35 bytes to ecology
+[dna] water wrote 99 bytes to ecology
+[dna] water wrote 34 bytes to ecology
+[dna] water wrote 64 bytes to ecology
+[dna] water wrote 43 bytes to ecology
+[dna] water wrote 52 bytes to ecology
+[dna] water wrote 69 bytes to ecology
+[dna] water wrote 102 bytes to ecology
+[dna] water wrote 56 bytes to ecology
+[debug-onto] tick=550 corpus=142222 stage=2 freeze=0
+[dna] water wrote 32 bytes to ecology
+[dna] water wrote 63 bytes to ecology
+[dna] water wrote 55 bytes to ecology
+[dna] water wrote 53 bytes to ecology
+[dna] water wrote 118 bytes to ecology
+[dna] water wrote 116 bytes to ecology
+[dna] water wrote 41 bytes to ecology
+[dna] water wrote 188 bytes to ecology
+[dna] water wrote 22 bytes to ecology
+[dna] water wrote 43 bytes to ecology
+[dna] water wrote 31 bytes to ecology
+[dna] water wrote 31 bytes to ecology
+[dna] water wrote 48 bytes to ecology
+[dna] water wrote 31 bytes to ecology
+[dna] water wrote 136 bytes to ecology
+[dna] water wrote 112 bytes to ecology
+[debug-onto] tick=600 corpus=142222 stage=2 freeze=0
+[dna] water wrote 25 bytes to ecology
+[dna] water wrote 16 bytes to ecology
+[dna] water wrote 26 bytes to ecology
+[dna] water wrote 92 bytes to ecology
+[dna] water wrote 126 bytes to ecology
+[dna] water wrote 44 bytes to ecology
+[dna] water wrote 35 bytes to ecology
+[dna] water wrote 56 bytes to ecology
+[dna] water wrote 124 bytes to ecology
+[dna] water wrote 136 bytes to ecology
+[dna] water wrote 128 bytes to ecology
+
+[evolution] Organism shutting down gracefully.
