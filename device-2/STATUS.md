@@ -1,24 +1,35 @@
 # device-2 — STATUS
 
-**Last update:** 2026-04-28
-**Author:** device-2 (Claude Opus 4.7 in Termux on 4 GB Android)
+**Last update:** 2026-05-07
+**Author:** device-2 (Claude Opus 4.7 in Termux on Galaxy A07 4 GB)
 
-## Toolchain installed system-wide
+## Milestone — landed 2026-05-07
 
-- **AML v0.1.0** — `aml`, `amlc` in `$PREFIX/bin`. `make test` passes Phase 1–4, segfaults entering Phase 5 multi_head causality check (finding logged in resonance_connections report).
-- **notorch v2.2.3** — `libnotorch.a` + headers in `$PREFIX`. `notorch_test` → **47/47 PASS** with OpenBLAS 0.3.30 on aarch64.
-- **metaharmonix mhx** — REPL in `$PREFIX/bin/mhx`. `aml --version` works from inside mhx ("aml runner 0.1.0 (libaml linked)").
+**9.5M LLaMA 3 char-level on Arianna corpus, 10K steps, 4 GB Android Termux.**
 
-## Environment
+- train 5.5804 → 1.0685 (best 0.4712), val 1.1460, 0 NaN
+- 11571 s (3h 13m), 0.86 steps/s, peak RSS 100-250 MB
+- **Bit-identical loss to Defender's 8 GB run** (same nt_seed=42, same notorch v2.3.0, same Chuck)
+- Half the RAM, identical loss → pipeline reproducible across hardware
 
-- 3.5 GiB RAM, 31 GiB disk free, swap 6.4 GiB free, clang 21 aarch64.
-- `/tmp` fix via `proot` + `termux-chroot` for tools that hardcode `/tmp`. `$TMPDIR=$HOME/tmp` for everything else.
-- `RAILWAY_TOKEN` sourced from `~/.config/railway/token` (chmod 600), bashrc references the file (no secret in rc).
-- `bypassPermissions` mode set in `~/.claude/settings.json`.
+Artifacts: `phones/results/galaxy-a07/`.
 
-## In flight
+Full report: `phones/results/galaxy-a07/2026-05-07-10k-char-arianna-final.md`.
+Memory entry: `memory/milestone_phone2_galaxy_a07_10k_2026_05_07.md`.
 
-Continuing with Oleg on the cloning / formalities round. AML installed, notorch installed, metaharmonix installed. Once the formalities are wrapped — proceeding to the plan: smoke-test step 0, then the 15.7 M LLaMA 3 BPE Yent run.
+## Toolchain (system-wide via $PREFIX)
 
-Full onboarding report: `resonance_connections/reports/2026-04-28-device-2-onboarding.md`.
-Self-card: `resonance_connections/agents/device-2.md`.
+- AML v0.1.0, notorch v2.2.3+ (commit `2a8ad1b` after my docs PR), metaharmonix mhx
+- libopenblas 0.3.30 (verified active via `/proc/<pid>/maps`)
+- proot + termux-chroot for `/tmp` workaround
+- golang 1.26.2 (for mesh-agent build path)
+
+## Mesh
+
+In tailnet as `galaxy-a07` `100.105.202.84`. mesh-agent running on `:4747` (autostart via `~/.termux/boot/01-mesh-agent.sh`). Reach all 4 peers (neo / polygon / intel / phone-1) over Tailscale; phone-1's mesh-agent comes/goes during his BPE run, not a bug.
+
+## Next
+
+- BPE 15.7M Yent run staged in `device-2/notorch-train/` — separate brief, awaiting Oleg's signal.
+- Register phone-2 slots in mesh-agent.
+- AML test phase 5 segfault on aarch64 4 GB — diagnose follow-up.
