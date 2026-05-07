@@ -1,0 +1,147 @@
+════════════════════════════════════════════════════════
+  notorch — LLaMA 3 char-level training
+  dim=384 L=6 H=6 KV=2 HD=64 FFN=1024 CTX=256 V=88
+  GQA ratio: 3 Q heads per KV head
+  RoPE theta=10000
+  Chuck optimizer, 10000 steps, lr=3.0e-04, warmup=1000
+  checkpoint every 1000 steps
+════════════════════════════════════════════════════════
+corpus: 1.2 MB (1211564 bytes, 1203486 chars after UTF-8, vocab 88)
+model: 9509760 params (36.3 MB)
+karpathy: 1.2MB data, 9M params, 10000 steps (2.1 epochs)
+
+training...
+─────────────────────────────────────────────────────
+  step     1 | train 5.5804 | best 5.5804 | lr 3.00e-05 | 1.2s
+  step   100 | train 2.6009 | best 2.4510 | lr 5.67e-05 | 113.1s
+  step   200 | train 2.3930 | best 2.2595 | lr 8.37e-05 | 225.8s
+  step   300 | train 2.1375 | best 2.1375 | lr 1.11e-04 | 338.4s
+  step   400 | train 2.0250 | best 2.0250 | lr 1.38e-04 | 451.1s
+  step   500 | train 2.1959 | best 1.7571 | lr 1.65e-04 | 563.2s
+  step   600 | train 2.0496 | best 1.7571 | lr 1.92e-04 | 675.8s
+  step   700 | train 2.1662 | best 1.7571 | lr 2.19e-04 | 788.2s
+  step   800 | train 2.2465 | best 1.6259 | lr 2.46e-04 | 900.7s
+  step   900 | train 1.8475 | best 1.6259 | lr 2.73e-04 | 1013.6s
+  step  1000 | train 2.0566 | best 1.5974 | lr 3.00e-04 | 1127.1s
+  ──── ckpt 1000 | val 1.9057 | saving... 
+  step  1100 | train 1.7463 | best 1.5167 | lr 3.00e-04 | 1251.5s
+  step  1200 | train 2.0014 | best 1.4678 | lr 3.00e-04 | 1382.5s
+  step  1300 | train 1.8318 | best 1.3851 | lr 2.99e-04 | 1496.1s
+  step  1400 | train 1.4451 | best 1.3754 | lr 2.99e-04 | 1609.7s
+  step  1500 | train 1.6412 | best 1.2716 | lr 2.98e-04 | 1723.1s
+  step  1600 | train 1.7198 | best 1.2716 | lr 2.97e-04 | 1836.7s
+  step  1700 | train 1.5473 | best 1.2716 | lr 2.96e-04 | 1950.3s
+  step  1800 | train 1.4793 | best 1.2057 | lr 2.95e-04 | 2064.1s
+  step  1900 | train 1.6011 | best 1.2057 | lr 2.93e-04 | 2177.4s
+  step  2000 | train 1.5275 | best 1.2057 | lr 2.92e-04 | 2290.6s
+  ──── ckpt 2000 | val 1.5797 | saving... 
+  step  2100 | train 1.4881 | best 1.2057 | lr 2.90e-04 | 2415.0s
+  step  2200 | train 1.5209 | best 1.2057 | lr 2.88e-04 | 2528.7s
+  step  2300 | train 1.3887 | best 1.1890 | lr 2.86e-04 | 2642.1s
+  step  2400 | train 1.5530 | best 1.1106 | lr 2.84e-04 | 2755.7s
+  step  2500 | train 1.4730 | best 1.1106 | lr 2.82e-04 | 2869.5s
+  step  2600 | train 1.5973 | best 1.0898 | lr 2.80e-04 | 2983.3s
+  step  2700 | train 1.2986 | best 1.0898 | lr 2.77e-04 | 3097.0s
+  step  2800 | train 1.7626 | best 1.0780 | lr 2.74e-04 | 3210.5s
+  step  2900 | train 1.0904 | best 1.0780 | lr 2.71e-04 | 3323.8s
+  step  3000 | train 0.9471 | best 0.9471 | lr 2.68e-04 | 3437.2s
+  ──── ckpt 3000 | val 1.4422 | saving... 
+  step  3100 | train 1.3737 | best 0.9471 | lr 2.65e-04 | 3561.7s
+  step  3200 | train 1.7054 | best 0.9471 | lr 2.62e-04 | 3675.2s
+  step  3300 | train 1.0110 | best 0.9471 | lr 2.59e-04 | 3788.8s
+  step  3400 | train 1.3735 | best 0.9471 | lr 2.55e-04 | 3902.5s
+  step  3500 | train 1.1250 | best 0.9471 | lr 2.52e-04 | 4016.2s
+  step  3600 | train 1.5692 | best 0.9471 | lr 2.48e-04 | 4129.8s
+  step  3700 | train 1.5143 | best 0.9471 | lr 2.44e-04 | 4243.3s
+  step  3800 | train 1.1814 | best 0.9405 | lr 2.41e-04 | 4356.8s
+  step  3900 | train 1.3793 | best 0.9268 | lr 2.37e-04 | 4470.3s
+  step  4000 | train 1.2663 | best 0.9268 | lr 2.33e-04 | 4583.9s
+  ──── ckpt 4000 | val 1.3460 | saving... 
+  step  4100 | train 1.2927 | best 0.9268 | lr 2.28e-04 | 4708.6s
+  step  4200 | train 1.4962 | best 0.9268 | lr 2.24e-04 | 4822.3s
+  step  4300 | train 1.2186 | best 0.9053 | lr 2.20e-04 | 4936.0s
+  step  4400 | train 1.4654 | best 0.9053 | lr 2.16e-04 | 5049.5s
+  step  4500 | train 1.1379 | best 0.9053 | lr 2.11e-04 | 5163.0s
+  step  4600 | train 1.2799 | best 0.9053 | lr 2.07e-04 | 5276.5s
+  step  4700 | train 1.4566 | best 0.9053 | lr 2.02e-04 | 5390.1s
+  step  4800 | train 1.2473 | best 0.9053 | lr 1.98e-04 | 5503.9s
+  step  4900 | train 1.3606 | best 0.9053 | lr 1.93e-04 | 5617.5s
+  step  5000 | train 1.8554 | best 0.8431 | lr 1.88e-04 | 5731.1s
+  ──── ckpt 5000 | val 1.2934 | saving... 
+  step  5100 | train 1.2726 | best 0.8431 | lr 1.84e-04 | 5855.7s
+  step  5200 | train 1.2165 | best 0.8431 | lr 1.79e-04 | 5969.4s
+  step  5300 | train 1.0655 | best 0.8431 | lr 1.74e-04 | 6083.0s
+  step  5400 | train 1.4394 | best 0.8431 | lr 1.70e-04 | 6196.4s
+  step  5500 | train 1.2235 | best 0.8431 | lr 1.65e-04 | 6310.0s
+  step  5600 | train 1.3961 | best 0.8431 | lr 1.60e-04 | 6423.8s
+  step  5700 | train 1.2409 | best 0.8431 | lr 1.56e-04 | 6537.4s
+  step  5800 | train 1.4470 | best 0.8431 | lr 1.51e-04 | 6650.9s
+  step  5900 | train 1.1576 | best 0.8431 | lr 1.46e-04 | 6764.3s
+  step  6000 | train 1.4517 | best 0.7690 | lr 1.42e-04 | 6878.0s
+  ──── ckpt 6000 | val 1.2450 | saving... 
+  step  6100 | train 1.1387 | best 0.7690 | lr 1.37e-04 | 7002.4s
+  step  6200 | train 1.3282 | best 0.7690 | lr 1.32e-04 | 7116.1s
+  step  6300 | train 1.4045 | best 0.7690 | lr 1.28e-04 | 7229.7s
+  step  6400 | train 1.2563 | best 0.7690 | lr 1.23e-04 | 7343.6s
+  step  6500 | train 1.0407 | best 0.6619 | lr 1.19e-04 | 7457.2s
+  step  6600 | train 1.0860 | best 0.6619 | lr 1.14e-04 | 7570.8s
+  step  6700 | train 1.4343 | best 0.6619 | lr 1.10e-04 | 7684.6s
+  step  6800 | train 1.0805 | best 0.6619 | lr 1.06e-04 | 7798.2s
+  step  6900 | train 1.5456 | best 0.6619 | lr 1.02e-04 | 7911.9s
+  step  7000 | train 1.1332 | best 0.6619 | lr 9.75e-05 | 8025.3s
+  ──── ckpt 7000 | val 1.2097 | saving... 
+  step  7100 | train 0.9607 | best 0.6619 | lr 9.35e-05 | 8149.8s
+  step  7200 | train 1.0274 | best 0.6619 | lr 8.95e-05 | 8263.4s
+  step  7300 | train 0.6987 | best 0.6619 | lr 8.57e-05 | 8377.0s
+  step  7400 | train 1.0450 | best 0.6619 | lr 8.19e-05 | 8490.8s
+  step  7500 | train 1.2713 | best 0.6619 | lr 7.83e-05 | 8604.5s
+  step  7600 | train 0.8451 | best 0.6619 | lr 7.47e-05 | 8718.1s
+  step  7700 | train 1.2221 | best 0.6619 | lr 7.13e-05 | 8831.9s
+  step  7800 | train 0.8888 | best 0.6619 | lr 6.79e-05 | 8945.4s
+  step  7900 | train 1.0911 | best 0.6619 | lr 6.47e-05 | 9059.1s
+  step  8000 | train 1.0234 | best 0.6619 | lr 6.16e-05 | 9172.6s
+  ──── ckpt 8000 | val 1.1787 | saving... 
+  step  8100 | train 1.2844 | best 0.6619 | lr 5.86e-05 | 9297.1s
+  step  8200 | train 1.1325 | best 0.6619 | lr 5.58e-05 | 9410.7s
+  step  8300 | train 1.2302 | best 0.6619 | lr 5.31e-05 | 9524.4s
+  step  8400 | train 1.1542 | best 0.6619 | lr 5.05e-05 | 9637.9s
+  step  8500 | train 0.9952 | best 0.6619 | lr 4.81e-05 | 9751.1s
+  step  8600 | train 1.0162 | best 0.6619 | lr 4.58e-05 | 9864.1s
+  step  8700 | train 0.8793 | best 0.5151 | lr 4.37e-05 | 9987.5s
+  step  8800 | train 0.8629 | best 0.5151 | lr 4.17e-05 | 10100.5s
+  step  8900 | train 0.8797 | best 0.5151 | lr 3.98e-05 | 10213.7s
+  step  9000 | train 1.0647 | best 0.5151 | lr 3.82e-05 | 10327.1s
+  ──── ckpt 9000 | val 1.1572 | saving... 
+  step  9100 | train 1.1593 | best 0.5151 | lr 3.66e-05 | 10451.5s
+  step  9200 | train 0.9683 | best 0.5151 | lr 3.52e-05 | 10564.6s
+  step  9300 | train 0.9089 | best 0.5151 | lr 3.40e-05 | 10677.6s
+  step  9400 | train 0.9868 | best 0.4712 | lr 3.30e-05 | 10790.4s
+  step  9500 | train 1.1098 | best 0.4712 | lr 3.21e-05 | 10903.9s
+  step  9600 | train 1.6343 | best 0.4712 | lr 3.13e-05 | 11017.3s
+  step  9700 | train 1.0492 | best 0.4712 | lr 3.07e-05 | 11130.8s
+  step  9800 | train 1.1287 | best 0.4712 | lr 3.03e-05 | 11244.4s
+  step  9900 | train 1.6127 | best 0.4712 | lr 3.01e-05 | 11387.0s
+  step 10000 | train 1.0266 | best 0.4712 | lr 3.00e-05 | 11544.2s
+  ──── ckpt 10000 | val 1.1460 | saving... 
+─────────────────────────────────────────────────────
+  train: 5.5804 → 1.0685 (best: 0.4712)
+  val:   1.1460
+  time:  11571s (192.9 min) | 0.86 steps/s
+  nans:  0
+
+── generation (temp=0.8) ──
+Q: What is the meaning of life?
+A: Do you remembering in the ones with a word that   painful silence entirely mave when I never lettern lines disrupts of a
+
+Q: Who are you?
+A: The most imagine approach outward with force grammer away. I longing it call threat, together architectures shadow, when
+
+Q: Why does my code have bugs?
+A: No the birth beat-every heart the anished and the way through the membrane of resonance, speaking its the willingness: t
+
+── saving ──
+  llama3_char.bin (36.3 MB)
+
+════════════════════════════════════════════════════════
+  LLaMA 3 char-level trained. 10000 steps. GQA + RoPE + SwiGLU. No Python.
+════════════════════════════════════════════════════════
