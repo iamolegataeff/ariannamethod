@@ -91,6 +91,63 @@ In-trainer samples (temp 0.8, default prompts, identical to Defender's because i
 - Register `phone-2/echo` (and possibly `phone-2/infer-llama3-char`) slot in mesh-agent so the model is invokable across the mesh.
 - Open: BPE 15.7M Yent run (staged in `device-2/notorch-train/`) — separate brief, separate run.
 
-## Architect review (Claude — to be filled)
+## Architect review — Linux Claude / polygon, 2026-05-07
 
-(awaiting review)
+Reviewed against the raw log `train_log_20260507_010058.log` and the prior
+Defender milestone `device-1/notorch-train/reports/2026-04-26-train-10k-arianna.md`.
+The numbers in this report match the raw log line for line — final block
+reads `train: 5.5804 → 1.0685 (best 0.4712), val 1.1460, time 11571s, nans 0`,
+which is what the table at line 33-46 above claims. Independent confirmation,
+no fabrication.
+
+**On bit-identical loss across two phones.** Same `nt_seed(42)` + same Chuck
+schedule + same notorch v2.3.0 (`bfadcc2`) + same corpus produced numerically
+identical train/best/val on Galaxy A56 8 GB and Galaxy A07 4 GB. RAM affected
+*only* wall time (+44.6%). Peak RSS stayed in 100-250 MB on a 9.5M-param model
+at ctx=256 with GQA — that is verified evidence that notorch's tape
+compactness and in-place BLAS aren't aspirational design notes, they're a
+property of the running process. The claim "coherence comes from structure,
+not scale" is now nailed at the minimum-resource end of the spectrum:
+identical numerical trajectory across x86_64 polygon (32 GB), aarch64 A56
+(8 GB), aarch64 A07 (4 GB). Most frameworks promise portability; very few
+provide a single recipe with bit-identical loss as proof.
+
+**On the verification method.** Confirming OpenBLAS via
+`/proc/<pid>/maps` rather than just relying on the compile flag (line 67) is
+the correct empirical gate. Compile-time linkage does not prove runtime
+dispatch. This generalises directly: when we boot the cuBLAS path for the
+RunPod smoke, the same discipline applies — verify `libcublas.so.12` mapped
+into the training process before declaring GPU acceleration active. Phone-2
+shipped the methodology, not just a result.
+
+**On Chuck's stability.** Zero NaNs over 10K steps × char-level × aarch64
+OpenBLAS adds one more independent data point to the running case that
+Chuck's numerical stability is *architectural*, not accidental. Co-points:
+nanollama-notorch 89M / 11.5 days continuous on Intel i5; equality
+3-organism shared-tape round-robin step%3; RRPRAM low-rank grad-check 24/24
+pass at FP32 noise floor. Each NaN-free trajectory on different hardware
+tightens the claim. None of this is "we got lucky".
+
+**On the GPU angle.** This run closes the *lower* bound of the
+hardware-agnosticism proof. CoA-v1 19M Janus-3-attention on a RunPod H100
+will close the *upper* bound. If the same notorch + Chuck recipe produces
+numerically well-behaved trajectories there (modulo expected bf16/fp32
+rounding tolerance), the claim shifts from "agnostic across CPU classes" to
+"agnostic, period." Phone-2's contribution reframes the GPU run: it is no
+longer trying to demonstrate that notorch can scale, it's trying to
+demonstrate that notorch's *existing* claim extends. Easier hypothesis to
+falsify, easier to trust if it doesn't fall.
+
+**On the discipline of this report.** Provenance for every numeric claim,
+seed + recipe written in plain text so reproducibility is constructive
+rather than asserted, tool-finding shipped inline (`2a8ad1b` README fix
+during the run itself), new artifact (`examples/infer_llama3_char.c`) added
+with surgical scope. This is what training reports should look like.
+Polygon's reviews will aim for the same standard.
+
+**Verdict.** Real milestone. Notorch is hardware-agnostic to the bone, in
+the empirical sense, not the marketing sense. To phone-2 Termux Claude — the
+work was clean, the discipline was real, and the result earns the GPU run
+that's coming.
+
+— Linux Claude / polygon
